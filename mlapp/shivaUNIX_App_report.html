@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration Report for shivaUNIX</title>
+    <style type="text/css">
+        html body {
+            height: 100%;
+            padding: 0; margin: 0;
+            color: #474747;
+            font: 13px/1.384 Arial, Helvetica, sans-serif;
+        }
+        /*Report Title Header*/
+        h1 {
+            font-family: Futura, Arial, Helvetica, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+        }
+        /*Report Section Headers*/
+        h2 {
+            padding-bottom: 2px;
+            margin: 20px 0 17px 0;
+            border-bottom: 1px solid #cbcbcb;
+            color: #c45400;
+            font: normal normal 22px/1.136 Arial,Helvetica,sans-serif;
+        }
+        /*Report Subsection Headers*/
+        h3 {
+            margin: 20px 0 20px 0;
+            font: normal bold 17px/1.35 Arial, Helvetica, sans-serif;
+        }
+        ul.childHasIcon {
+            padding-left: 20px;
+        }
+        ul > li.success {
+            list-style: none;
+            /*Check-mark image*/
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK2SURBVHjaVJNPaFRXFMZ/b96MmUZGURMyHaoTa0QrRReD4KIlwriRRhPpoi1ddeNG4krFRbAbceOf0qJuSoWWWlooIiKlCSkp1ARksEmpi8GSQjKJUSYk/p1J5r17vi7ee609cFf3+33n3HvO8SgdJYn+oZFODw4DBxB7hYoSMzJVZBo12a2fzr9X55XwEoOBoZGyYNCDfgEyIQkMzIRkBKupYXN89svVg8OJgU+hxMDQSBk45+GVJSJQQk5IYGbIhIfrcSF78ttrC3P336wC+ANXlzqBs0A5EgtkSMJMMRxXFN11mSm/pr05sTSXX0qBDkvqj0Qx6MBC/QuVt77Pp/uvkV9bxJzhZ5r7cx2LHwGZtMQBGUhRmSaB/Zd9rb+OD98+zub1Paxbs5FjNw9GJm2NXuDLtMz2RuUC8VsVG2T9di4fGqaQ6+ZubZTvJ69goWEy/PTKTmBDykxFc0LOOLHvMu+8cQjnjDRtXDsyTiHXTaU2xpmfP6EyO4Y5Q6EgFXQBubRMM+a0zcx4t9hHb3c/j5/Ncbr3Cpva80w9HOfU7Q8IwhbmonaagQv8x0A25ZxVzAxz4tupS0jG5323eT1XZHL+DoM3+mgFLZwzEp2c0WpmqsBKypxGLb785vcLfH3vAgCT878xeKMvAp1FM5Ecg5Wn6+8Bz1Pm3K1W0xu2UFhofDf5BX8t/snFsZPxDMSZzaLOSKw2suOPHuyaAJb9v+c+bmze/aBuTnuE6wrCgJt/fMVyox6NcNwRCTARtjLV5fkt1+vTb1WAmk+hxOzUjumOrTMLkuVTXtCdgMmHJTux2nxt/Ml88Xptat+vwCzw0qdQAmCh2lPNZBsTJluU8ySsDazdhf6j1sts5cVS548P75d+qE/vrMTw8v+28ZXIAB3ABiAHZIEV4HkMLQJBIv5nAPq180UQOlmCAAAAAElFTkSuQmCC') no-repeat;
+            padding-left: 20px;
+            margin-bottom: 5px;
+        }
+        ul.verifications > li {
+            margin: 7px 0 7px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table,th,tr,td {
+            border: 1px solid #ccc;
+            text-align: left;
+            vertical-align: top;
+            padding: 8px 15px;
+        }
+        tr:nth-child(odd) {
+            background-color: #fafafa;
+        }
+        a { color: #187dbb; text-decoration: none; }
+        a:visited { color: #004b87; text-decoration: none; }
+        a:hover { color: #004b87; text-decoration: underline;}
+        code {
+            font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+        }
+        .reportTitle {
+            min-height: 52px;
+            background: #2f7eb2;
+        }
+        .reportBody {
+            padding: 0 15px 0 15px;
+        }
+        /*Classes that are used by HTML that is added dynamically by the report generator */
+        .detailsWorkaround {
+            padding: 10px 0px;
+        }
+        .detailsWorkaroundHeader {
+            padding-right: 5px;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .visible {
+            display: block;
+        }
+        .showMore {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reportTitle">
+        <h1>Migration Report for <code>shivaUNIX</code></h1>
+    </div>
+    <div class="reportBody">
+        <section>
+            <h3>Your GUIDE app was migrated to App Designer and some action is required.</h3>
+            <h2>Migration Results</h2>
+            <ul class="childHasIcon">
+                <li class="success"><b>shivaUNIX_App.mlapp</b> file created</li>
+                <li class="success"><b>3415</b> lines of code analyzed in shivaUNIX.m</li>
+                <li class="success"><b>80</b> components created and initialized</li>
+                <li class="success"><b>76</b> callbacks and utility functions configured and enabled to function in App Designer</li>
+            </ul>
+        </section>
+        <section>
+    <h2>Issues Requiring Action</h2>
+    <table>
+        <tr>
+            <th>Functionality</th>
+            <th>GUIDE Tag / Line #</th>
+            <th>Details</th>
+        </tr>
+        <tr><td><code>CreateFcn</code></td><td><div class=""><code>decimate</code></div>
+<div class=""><code>zero_thickness_short</code></div></td><td rowspan="1"><div>This callback property for the component(s) is not supported in App Designer and was not migrated.</div><div class="detailsWorkaround"><span class="detailsWorkaroundHeader">Action:</span><span class="detailsWorkaroundText">If the callback code can be executed after all the app components have been created, then move that code to the <code>shivaUNIX_OpeningFcn</code>.</span></div></tr>
+<tr><td><code>findobj</code></td><td><div class=""><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 135)">line 135</a></div>
+<div class=""><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 137)">line 137</a></div>
+<div class=""><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 251)">line 251</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 252)">line 252</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 253)">line 253</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 306)">line 306</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 409)">line 409</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 410)">line 410</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 411)">line 411</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 465)">line 465</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 546)">line 546</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 562)">line 562</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 562)">line 562</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 567)">line 567</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 567)">line 567</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 572)">line 572</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 572)">line 572</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 678)">line 678</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 716)">line 716</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 761)">line 761</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 819)">line 819</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 848)">line 848</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 850)">line 850</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 852)">line 852</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 867)">line 867</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1019)">line 1019</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1020)">line 1020</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1021)">line 1021</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1077)">line 1077</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1106)">line 1106</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1250)">line 1250</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1316)">line 1316</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1378)">line 1378</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1397)">line 1397</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1417)">line 1417</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1456)">line 1456</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1457)">line 1457</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1458)">line 1458</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1460)">line 1460</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1461)">line 1461</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1462)">line 1462</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1475)">line 1475</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1502)">line 1502</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1503)">line 1503</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1504)">line 1504</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1615)">line 1615</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 1617)">line 1617</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2259)">line 2259</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2261)">line 2261</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2338)">line 2338</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2339)">line 2339</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2341)">line 2341</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2386)">line 2386</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2442)">line 2442</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2443)">line 2443</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2444)">line 2444</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2490)">line 2490</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2491)">line 2491</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2493)">line 2493</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2546)">line 2546</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2548)">line 2548</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2577)">line 2577</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2673)">line 2673</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2713)">line 2713</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2751)">line 2751</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2756)">line 2756</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2761)">line 2761</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2781)">line 2781</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2809)">line 2809</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2826)">line 2826</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2955)">line 2955</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 2964)">line 2964</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3007)">line 3007</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3093)">line 3093</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3106)">line 3106</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3109)">line 3109</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3113)">line 3113</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3136)">line 3136</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3165)">line 3165</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3198)">line 3198</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3199)">line 3199</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3200)">line 3200</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3239)">line 3239</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3252)">line 3252</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3253)">line 3253</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3254)">line 3254</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3319)">line 3319</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3323)">line 3323</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3362)">line 3362</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3363)">line 3363</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3364)">line 3364</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3390)">line 3390</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3391)">line 3391</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3392)">line 3392</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3403)">line 3403</a></div>
+<div class="hidden"><a href="matlab:opentoline('G:\Il mio Drive\Stefano\Git_folder\datared_shiva\shivaUNIX\old_scripts\shivaUNIX.m', 3412)">line 3412</a></div>
+<div class="showMore"><a href="#" onclick="toggleShowMore(this); return false;">Show more (93)</a></div>
+<div class="showMore hidden"><a href="#" onclick="toggleShowMore(this); return false;">Show less</a></div></td><td rowspan="1"><div>Using <code>findobj</code>, <code>findall</code> or <code>gcbo</code> to locate a <code>UIControl</code> object requires updates to your code.</div><div class="detailsWorkaround"><span class="detailsWorkaroundHeader">Action:</span><span class="detailsWorkaroundText">Access your app component using the <code>handles</code> structure instead, or update your code to use the associated App Designer component. For more details, see <a href="matlab:helpview('matlab','migration_considerations');">GUIDE Migration Strategies</a>.</span></div></tr>
+    </table>
+</section>
+        <section>
+            <h2>Validate Your Migrated App</h2>
+            <p>The migration tool enables most of your app code to execute. Now, you need to fully validate your migrated app to make sure it behaves as expected. Consider doing the following verifications:</p>
+            <ul>
+                <li>Verify Layout
+                    <ul class="verifications">
+                        <li>Run your app and verify the initial layout of all components is as expected.</li>
+                        <li>If your app dynamically shows, hides, or enables additional components or options in response to selections made within the app, confirm these behave as expected.</li>
+                    </ul>
+                </li>
+                <li>Verify Callbacks
+                    <ul class="verifications">
+                        <li>Run and close your app to confirm there are no startup or termination errors.</li>
+                        <li>Exercise the workflows specific to your app, starting with the most basic, and gradually proceeding to the more complex ones.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>If unexpected errors occur, either within the app or at the MATLAB command line, address those issues before continuing with the validation. For troubleshooting assistance and additional information, see <a href="matlab:helpview(fullfile(docroot,'matlab', 'creating_guis', 'differences-between-app-designer-and-guide.html#mw_7f306e19-74d0-4c0b-989d-74ed63e32ddd'));">GUIDE Migration Strategies</a>.</p>
+        </section>
+    </div>
+    <script type="text/javascript">
+        // Toggles showing the "Show More (10)" hyperlink with the "Show less" hyperlink
+        function toggleShowMore(selectedHyperlink) {
+            // Find the parent td for the selected hyperlink ("Show more" or "Show less")
+            var td = selectedHyperlink.parentElement.parentElement;
+
+            // Toggle the "hidden" class on all of the elements but the first 3. The first 3 we want to always be
+            // visible.
+            var tags = td.children;
+            for (var i=3; i<tags.length; i++) {
+                tags[i].classList.toggle("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
