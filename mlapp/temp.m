@@ -41,7 +41,7 @@ thick=5e-2;
 %%
 
 %__________________Input Thermal propeties (from file "thermal.txt")
-patty='C:\Users\Elena Spagnuolo\Documents\script\script\SHIVA\thermal.txt'
+patty='./thermal.txt';
 fid=fopen(patty,'r');
 if fid==0 | fid ==-1
     c=2200;
