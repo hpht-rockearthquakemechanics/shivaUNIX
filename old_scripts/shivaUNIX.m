@@ -6,7 +6,6 @@
 % ----------------------------------------------------------------------- %
 % With contributions from Christopher W. Harbord, Stefano Aretusini
 
-
 function varargout = shivaUNIX(varargin)
 % SHIVAUNIX M-file for shivaUNIX.fig
 %      SHIVAUNIX, by itself, creates a new SHIVAUNIX or raises the existing
@@ -22,7 +21,8 @@ function varargout = shivaUNIX(varargin)
 %      existing singleton*.  Starting from the left, property value pairs are
 %      applied to the GUI before shivaWIN_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to shivaUNIX_OpeningFcn via varargin.
+%      stop.  All inputs are passed to shivaUNIX_OpeningFcn via varargin.3
+
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
@@ -572,7 +572,6 @@ legend(handles.axes3,[handles.column{handles.g3}])
 lim3=get(handles.axes3,'Ylim'); a=findobj('Tag','lim3S'); set(a,'String',lim3(:,2)); b=findobj('Tag','lim3I'); set(b,'String',lim3(:,1));
 if (stato ==1) ; set(handles.axes3,'XLim',[posx]); end
 end
-
 
 % --------------------------------------------------------------------
 function PrintMenuItem_Callback(hObject, eventdata, handles)
@@ -1700,10 +1699,139 @@ end
 %eval(['save(nome3,''-struct'',''handles'',' O1 ');'])
 %save('parametri','-struct','handles','loadT','shearT','triggered','cutted'
 %,'dt','sm')
+
+%% obj Callback
+function cut_dt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cut_dt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+function File_Callback(hObject, eventdata, handles)
+% hObject    handle to File (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+end
+% definisce il diametro interno ed esterno
+function Rint_Callback(hObject, eventdata, handles)
+% hObject    handle to Rint (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+end
+% --- Executes during object creation, after setting all properties.
+function Rint_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Rint (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+function Rext_Callback(hObject, eventdata, handles)
+% hObject    handle to Rext (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Rext as text
+%        str2double(get(hObject,'String')) returns contents of Rext as a double
 end
 
+% --- Executes during object creation, after setting all properties.
+function Rext_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Rext (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
 
+% --- Executes on button press in fluid.
+function fluid_Callback(hObject, eventdata, handles)
+% hObject    handle to fluid (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of fluid
+end
+% --- Executes during object creation, after setting all properties.
+function edit1LB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1LB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+% --- Executes during object creation, after setting all properties.
+function edit2LB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit2LB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+% --- Executes during object creation, after setting all properties.
+function edit3LB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit3LB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+% --------------------------------------------------------------------
+function Figure_Callback(hObject, eventdata, handles)
+% hObject    handle to Figure (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+end
+% --- Executes on button press in slipON.
+function slipON_Callback(hObject, eventdata, handles)
+% hObject    handle to slipON (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of slipON
+end
+% --- Executes on button press in GH.
+function GH_Callback(hObject, eventdata, handles)
+% hObject    handle to GH (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of GH
+
+end
+% --- Executes on button press in TC.
+function TC_Callback(hObject, eventdata, handles)
+% hObject    handle to TC (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of TC
+end
 function nodeEnc1_Callback(hObject, eventdata, handles)
 % hObject    handle to nodeEnc1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1724,8 +1852,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
-
 function MaxEnc_Callback(hObject, eventdata, handles)
 % hObject    handle to MaxEnc (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1734,7 +1860,6 @@ function MaxEnc_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of MaxEnc as text
 %        str2double(get(hObject,'String')) returns contents of MaxEnc as a double
 end
-
 % --- Executes during object creation, after setting all properties.
 function MaxEnc_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to MaxEnc (see GCBO)
@@ -1747,8 +1872,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
-
 function nodeEnc2_Callback(hObject, eventdata, handles)
 % hObject    handle to nodeEnc2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1757,7 +1880,6 @@ function nodeEnc2_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of nodeEnc2 as text
 %        str2double(get(hObject,'String')) returns contents of nodeEnc2 as a double
 end
-
 % --- Executes during object creation, after setting all properties.
 function nodeEnc2_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to nodeEnc2 (see GCBO)
@@ -1770,7 +1892,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 function T0_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit13 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1782,7 +1903,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 function T0_Callback(hObject, eventdata, handles)
 % hObject    handle to TT (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1791,7 +1911,6 @@ function T0_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of TT as text
 %        str2double(get(hObject,'String')) returns contents of TT as a double
 end
-
 % --- Executes during object creation, after setting all properties.
 function TT_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to TT (see GCBO)
@@ -1804,7 +1923,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on button press in AdjRate.
 function AdjRate_Callback(hObject, eventdata, handles)
 % hObject    handle to AdjRate (see GCBO)
@@ -1813,7 +1931,6 @@ function AdjRate_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of AdjRate
 end
-
 % --- Executes on button press in Torque.
 function Torque_Callback(hObject, eventdata, handles)
 % hObject    handle to Torque (see GCBO)
@@ -1822,27 +1939,23 @@ function Torque_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of Torque
 end
-
 % --- Executes on button press in off_enc_0.
 function off_enc_0_Callback(hObject, eventdata, handles)
 % hObject    handle to off_enc_0 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
 I=handles.triggered;
 handles.Encoder2(1:I)=0;
 handles.Encoder(1:I)=0;
 guidata(hObject, handles);
 end
-
 % --- Executes on button press in incremental.
 function incremental_Callback(hObject, eventdata, handles)
 % hObject    handle to incremental (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 end
-
 % --- Executes on button press in vac.
 function vac_Callback(hObject, eventdata, handles)
 % hObject    handle to vac (see GCBO)
@@ -1851,7 +1964,6 @@ function vac_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of vac
 end
-
 % --- Executes on button press in get_thickness.
 function get_thickness_Callback(hObject, eventdata, handles)
 % hObject    handle to get_thickness (see GCBO)
@@ -1860,8 +1972,6 @@ function get_thickness_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of get_thickness
 end
-
-
 function zero_thickness_long_Callback(hObject, eventdata, handles)
 % hObject    handle to zero_thickness_long (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1870,7 +1980,6 @@ function zero_thickness_long_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of zero_thickness_long as text
 %        str2double(get(hObject,'String')) returns contents of zero_thickness_long as a double
 end
-
 % --- Executes during object creation, after setting all properties.
 function zero_thickness_long_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to zero_thickness_long (see GCBO)
@@ -1892,7 +2001,6 @@ function popupAI6_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI6 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI6
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI6_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI6 (see GCBO)
@@ -1905,7 +2013,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI7.
 function popupAI7_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI7 (see GCBO)
@@ -1915,7 +2022,6 @@ function popupAI7_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI7 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI7
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI7_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI7 (see GCBO)
@@ -1928,7 +2034,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI8.
 function popupAI8_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI8 (see GCBO)
@@ -1938,7 +2043,6 @@ function popupAI8_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI8 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI8
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI8_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI8 (see GCBO)
@@ -1951,7 +2055,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI9.
 function popupAI9_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI9 (see GCBO)
@@ -1961,7 +2064,6 @@ function popupAI9_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI9 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI9
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI9_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI9 (see GCBO)
@@ -1974,7 +2076,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI10.
 function popupAI10_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI10 (see GCBO)
@@ -1984,7 +2085,6 @@ function popupAI10_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI10 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI10
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI10_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI10 (see GCBO)
@@ -1997,7 +2097,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI16.
 function popupAI16_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI16 (see GCBO)
@@ -2007,7 +2106,6 @@ function popupAI16_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI16 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI16
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI16_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI16 (see GCBO)
@@ -2020,7 +2118,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI17.
 function popupAI17_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI17 (see GCBO)
@@ -2030,7 +2127,6 @@ function popupAI17_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI17 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI17
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI17_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI17 (see GCBO)
@@ -2043,7 +2139,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupPF.
 function popupPF_Callback(hObject, eventdata, handles)
 % hObject    handle to popupPF (see GCBO)
@@ -2053,7 +2148,6 @@ function popupPF_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupPF contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupPF
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupPF_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupPF (see GCBO)
@@ -2066,7 +2160,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupAI18.
 function popupAI18_Callback(hObject, eventdata, handles)
 % hObject    handle to popupAI18 (see GCBO)
@@ -2076,7 +2169,6 @@ function popupAI18_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupAI18 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupAI18
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupAI18_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupAI18 (see GCBO)
@@ -2089,7 +2181,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes on selection change in popupPC.
 function popupPC_Callback(hObject, eventdata, handles)
 % hObject    handle to popupPC (see GCBO)
@@ -2099,7 +2190,6 @@ function popupPC_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupPC contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupPC
 end
-
 % --- Executes during object creation, after setting all properties.
 function popupPC_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupPC (see GCBO)
@@ -2112,19 +2202,57 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
 % --- Executes when uipanel1 is resized.
 function uipanel1_ResizeFcn(hObject, eventdata, handles)
 % hObject    handle to uipanel1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 end
+% --- Executes during object creation, after setting all properties.
+function brutalfilt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to brutalfilt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+% --- Executes on button press in get_thickness_short.
+function get_thickness_short_Callback(hObject, eventdata, handles)
+% hObject    handle to get_thickness_short (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of get_thickness_short
+end
+function zero_thickness_short_Callback(hObject, eventdata, handles)
+% hObject    handle to zero_thickness_short (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of zero_thickness_short as text
+%        str2double(get(hObject,'String')) returns contents of zero_thickness_short as a double
+end
+% --- Executes during object creation, after setting all properties.
+function zero_thickness_short_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to zero_thickness_short (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'));
+    set(hObject,'BackgroundColor','white');
+end
+end
 
 %% refresh temperature callback
 % --- Executes on button press in pushbutton18.
 function pushbutton18_Callback(hObject, eventdata, handles)
 disp('Refresh temperature!')
-
 AIstate=zeros(1,18);
 for L=1:18
     obj=num2str(L); obj=strcat('popupAI',obj);
