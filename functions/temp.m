@@ -41,7 +41,7 @@ thick=5e-2;
 %%
 
 %__________________Input Thermal propeties (from file "thermal.txt")
-patty='C:\Users\Elena Spagnuolo\Documents\script\script\SHIVA\thermal.txt'
+patty='thermal.txt';
 fid=fopen(patty,'r');
 if fid==0 | fid ==-1
     c=2200;
@@ -56,9 +56,13 @@ else
         cac=fgets(fid);
         if cac==-1 | isempty(cac)
             break
-        elseif cac(1) ~= '%' & length(cac)>1
-            cac1=str2num(cac);
-            c=cac1(1); Rho=cac1(2); Kappa=cac1(3);
+        elseif cac(1) == "%" & length(cac)>1 
+            if ~isempty(str2num(cac))
+                cac1=str2num(cac);
+                c=cac1(1); Rho=cac1(2); Kappa=cac1(3);
+            else
+                c=2200; Rho=2860; Kappa=1.27E-006;  
+            end
         end
     end
     fclose(fid);

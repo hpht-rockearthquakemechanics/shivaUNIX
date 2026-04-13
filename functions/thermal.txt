@@ -1,0 +1,38 @@
+% Created by:
+% ----------------------------------------------------------------------- % 
+%   Author:  Elena Spagnuolo                                              %
+%   Date:    2012                                                         %
+%   E-mail:                                                               %
+% ----------------------------------------------------------------------- %
+
+%cp Rho Kappa (thermal diffusivity)
+%cp=J/Kg°K--> 1J=0.239*cal; %key= (m^2/s) %rho=Kg/m^3
+%carbonates
+%525.8 2860 1.27E-006
+%woodford shale
+%1749 863.73 4E-7
+%western pacific
+%1749 777.36 4E-7
+%gabbro
+%950 2980 1.2E-6
+%peridotite
+%1260 3223 1.7e-6
+%granite
+%790 2670 1.6e-6
+%novaculite
+%730 2650 1.4e-6
+%dolomite
+%920 2800 2.6e-6
+%limestone
+%850 2700 1.1e-6
+%serpentinite
+%1090 3000 1.3e-6
+%sandstone
+%%density depends on porosity phi=0.007 pho=2700; 0.10 2500 0.20 2300 0.30 2200
+%730 2570 1.4e-6
+%clay soils
+%2127 2490 5e-7
+%shale
+%2151 2170 8e-7
+%basalt (%Giacomel et al. 2017)
+898 2960 1.2e-6

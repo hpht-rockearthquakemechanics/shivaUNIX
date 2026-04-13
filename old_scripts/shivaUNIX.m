@@ -65,6 +65,14 @@ function shivaUNIX_OpeningFcn(hObject, eventdata, handles, varargin)
 % Function to maximize the window via undocumented Java call.
 % Reference: http://undocumentedmatlab.com/blog/minimize-maximize-figure-window
 
+% Preparation of paths
+% go to root
+thisFilePath = mfilename('fullpath');
+cd(fileparts(thisFilePath))
+cd ..
+% add all subfolders to path
+addpath(genpath(pwd))
+
 set(handles.figure1, 'units', 'normalized', 'position', [0.01 0.01 0.9 0.9])
 
 axes(handles.axes6)
