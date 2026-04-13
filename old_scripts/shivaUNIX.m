@@ -2260,52 +2260,22 @@ end
 %% refresh temperature callback
 % --- Executes on button press in pushbutton18.
 function pushbutton18_Callback(hObject, eventdata, handles)
-disp('Refresh temperature!')
-AIstate=zeros(1,18);
-for L=1:18
-    obj=num2str(L); obj=strcat('popupAI',obj);
-    if isempty(findobj('Tag',obj))
-    else
-        h=findobj('Tag',obj);
-        AIstate(1,L)=get(h,'Value');
-    end
-end
-
-for L=1:18
-    b=strfind(handles.column,strcat('AI',num2str(L))); j=0; n=[];
-    for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-    for j=1:length(n)
-        switch AIstate(L)
-            
-            case 3
-                disp('thermocouple')
-                new.InternalTemperature=calibrate_temperature_fx(120,handles.(handles.column{n(j)}),[],[]);
-                %output=calibrate_temperature_fx(gain,input_hj,input_cj,compensation)
-                new.InternalTemperature(isnan(new.InternalTemperature))=0;
+    disp('Refresh temperature!')
+    
+    % 1. Raccogli i parametri dalla UI
+    AIstate=zeros(1,18);
+    for L=1:18
+        h_ai = findobj('Tag',['popupAI',num2str(L)]);
+        if ~isempty(h_ai)
+            AIstate(L) = get(h_ai,'Value');
         end
     end
-end
 
-% update the columns
+    % 2. Chiama la funzione esterna
+    handles = recalculate_temperature(handles, AIstate);
 
-
-K=find(~strcmp('InternalTemperature',handles.column));
-handles.column=handles.column(K);
-handles.column{end+1}='InternalTemperature';
-
-%update struct
-handles.InternalTemperature=new.InternalTemperature;
-
-% h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column)
-% h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column)
-% h_=findobj('Tag','edit3LB'); set(h_,'String',handles.column)
-%
-%
-% handles.Done=1;
-% handles.new=fieldnames(new)';
-guidata(hObject, handles);
-% plotta_ora(handles)
-
+    guidata(hObject, handles);
+    plotta_ora(handles)
 end
 
 %% refresh_tau callback
@@ -2314,146 +2284,22 @@ function pushbutton19_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton19 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-%% preamble
-%definisce la calibrazion
-
-if any(strcmp(fieldnames(handles),'smooth'));
-    %msgbox('I will work only on not smoothed data')
-    nomi=handles.column;
-    for i=1:length(nomi)
-        if strfind(nomi{i},'smooth'); handles=rmfield(handles,nomi{i});
-            K=find(~strcmp(nomi{i},handles.column));
-            handles.column=handles.column(K);
-        end
-    end
-end
-
-
-if any(strcmp(fieldnames(handles),'new'))
     
-    nomi=handles.new;
-    for i=1:length(nomi)
-        handles = rmfield(handles, nomi(i));
-        K=find(~strcmp(nomi(i),handles.column));
-        handles.column=handles.column(K);
-    end
-    if any(strcmp(fieldnames(handles),'new')); handles=rmfield(handles,'new');end
-end
+    % 1. Raccogli i parametri dalla UI
+    rint = str2double(get(findobj('Tag','Rint'),'String'))/2000;
+    rext = str2double(get(findobj('Tag','Rext'),'String'))/2000;
+    calibration_index = get(findobj('Tag','calibration'),'Value');
+    is_GH = get(findobj('Tag','GH'),'Value');
+    pf_index = get(findobj('Tag','popupPF'),'Value');
 
+    % 2. Chiama la funzione esterna
+    handles = recalculate_stress(handles, rint, rext, calibration_index, is_GH, pf_index);
 
+    % 3. Aggiorna la UI
+    set(findobj('Tag','edit1LB'),'String',handles.column);
+    set(findobj('Tag','edit2LB'),'String',handles.column);
+    set(findobj('Tag','edit3LB'),'String',handles.column);
 
-dint=findobj('Tag','Rint'); rint=str2double(get(dint,'String'))/2000;
-dext=findobj('Tag','Rext'); rext=str2double(get(dext,'String'))/2000;
-
-h_=findobj('Tag','calibration'); contents=get(h_,'Value');
-
-if contents==2; cal.tHG=73.86; cal.tLG=cal.tHG; fref=250; end
-if contents==3; cal.tHG=1117.17; cal.tLG=cal.tHG; fref=250; end
-if contents==4; cal.tHG=730.94; cal.tLG=cal.tHG; fref=250; end
-if contents==5; cal.tLG=1118; cal.tHG=cal.tLG*100; fref=250; end
-if contents==6; cal.tHG=1179.2; cal.tLG=0.736e6; fref=250; end
-if contents==7; cal.tHG=0; cal.tLG=0.736e6; fref=125;
-    if isempty(handles.Done); handles.Stamp=handles.Stamp*1.2; handles.Time=handles.Time*1.2; end
-end
-if contents==8; cal.tHG=0; cal.tLG=0.736e6; fref=125;
-    if isempty(handles.Done); handles.Stamp=handles.Stamp*1.24; handles.Time=handles.Time*1.25; end
-end
-if contents==9; cal.tHG=0; cal.tLG=0.736e6; fref=125;
-    if isempty(handles.Done); handles.Stamp=handles.Stamp*2; handles.Time=handles.Time*2; end
-end
-if contents==10; cal.tHG=0; cal.tLG=0.736e6; fref=125; end
-if contents==11; cal.tHG=0; cal.tLG=0.736e6; fref=125; end
-if contents==11; cal.tHG=0; cal.tLG=0.736e6; fref=125; end
-if contents==12; cal.tHG=0; cal.tLG=0.736e6; fref=100; cal.enc(1)=4/3*pi*(rext^2+rint*rext+rint^2)/(rext+rint)*10;
-end
-
-cal.tSG=17.19E6;
-
-cal.torqueHG(1:12)=cal.tHG*3/2/pi/(rext^3-rint^3)*1E-6;
-cal.torqueLG(1:12)=cal.tLG*3/2/pi/(rext^3-rint^3)*1E-6;
-cal.torqueSG(1:12)=cal.tSG*3/2/pi/(rext^3-rint^3)*1E-6;
-rint_o=rint;
-%rint=0;
-
-if contents>=11; cal.ax=-7.93457/pi/(rext^2-rint^2)/1000; %MPa
-else cal.ax=2.5/pi/(rext^2-rint^2)/1000; %MPa
-end
-
-%% calibrate only Normal, shear1, mu1
-
-%% calculate normal stress
-
-b=(strfind(handles.column,'Axial')); j=0; n=[];
-for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-for j=1:length(n);
-    eval(['new.Normal=handles.' handles.column{n(j)} '*cal.ax(j);'])
-end
-
-%% correct the normal stress with springs elasticity
-h_=findobj('Tag','GH');
-statoGH=get(h_,'Value');
-if statoGH==1
-    % calibrazione Normal load gouge holder
-    x=handles.LVDT-handles.LVDT(1);
-    a=abs(x- 5.37);
-    Ia=find(a==min(a),1,'first');
-    new.dspring=(x - x(Ia))*cal.lv(1);
-    new.dspring(1:Ia)=0;
-    
-    if contents>=11; new.NormalGH=(-7.93457*handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000; %MPa
-    else new.NormalGH=(2.5*handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000;
-    end
-    
-end
-
-%% calibrate Torque, calculate shear and apparent mu
-
-b=(strfind(handles.column,'Torque')); j=0; n=[];
-for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-
-for j=1:length(n)
-    if or(~isempty(strfind(handles.column{n(j)},'HG')),strcmp(handles.column{n(j)},'Torque'))
-        cali=cal.torqueHG(j);
-    elseif ~isempty(strfind(handles.column{n(j)},'LG'))
-        cali=cal.torqueLG(j);
-    end
-    
-    eval(['new.shear' num2str(j) '=handles.' handles.column{n(j)} '*cali;']);
-    eval(['new.Mu' num2str(j) '=new.shear' num2str(j) './new.Normal;']);
-    
-    if statoGH==1;eval(['new.Mu' num2str(j) '=new.shear' num2str(j) './new.NormalGH;']); end
-end
-
-%% final routine to update the fields
-nomi=[];
-
-[a,b]=size(handles.column); [aa,bb]=size(fieldnames(new));
-fname=fieldnames(new);
-for i=1:length(fname)
-    K=find(~strcmp(fname{i},handles.column));
-    handles.column=handles.column(K);
-end
-inp1=handles.column;
-
-if aa==1 & aa==b | bb==1 & a==1; inp1=handles.column'; end
-nomi=[inp1 ; fieldnames(new)];
-
-handles.column=[];
-handles.column=nomi';
-
-nomi2=fieldnames(new);
-for i=1:length(nomi2)
-    eval(['handles.' char(nomi2(i)) '=new.' char(nomi2(i)) ';'])
-end
-
-h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column)
-h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column)
-h_=findobj('Tag','edit3LB'); set(h_,'String',handles.column)
-
-
-handles.Done=1;
-handles.new=fieldnames(new)';
 guidata(hObject, handles);
 plotta_ora(handles)
 end
@@ -2613,62 +2459,27 @@ function refresh_thickness_Callback(hObject, eventdata, handles)
 % hObject    handle to refresh_thickness (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    
+    % 1. Raccogli i parametri dalla UI
+    is_thickness_checked = get(findobj('Tag','get_thickness'),'Value');
+    if ~is_thickness_checked
+        disp('Thickness calculation skipped because the checkbox is not selected.');
+        return;
+    end
 
-cal.lv(1)=5.0634;
-cal.lv(2)=0.3;
+    ztl = str2double(get(findobj('Tag','zero_thickness_long'),'String'));
+    zts = str2double(get(findobj('Tag','zero_thickness_short'),'String'));
 
-h_=findobj('Tag','zero_thickness_long'); % volts
-ztl=get(h_,'String');
-ztl=str2double(ztl);
+    % 2. Chiama la funzione esterna
+    handles = recalculate_thickness(handles, ztl, zts);
 
-h_=findobj('Tag','zero_thickness_short'); % mm
-zts=get(h_,'String');
-zts=str2double(zts);
+    % 3. Aggiorna la UI
+    set(findobj('Tag','edit1LB'),'String',handles.column);
+    set(findobj('Tag','edit2LB'),'String',handles.column);
+    set(findobj('Tag','edit3LB'),'String',handles.column);
 
-b=(strfind(handles.column,'LVDT')); j=0; n=[];
-for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-for j=1
-    new.thickness_low=(handles.(handles.column{n(j)})-ztl)*cal.lv(1);
-end
-
-b=(strfind(handles.column,'short')); j=0; n=[];
-for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-for j=1
-    new.thickness_high=zts-cal.lv(2)*(handles.(handles.column{n(j)}));
-end
-
-
-%% final routine to update the fields
-nomi=[];
-
-[a,b]=size(handles.column); [aa,bb]=size(fieldnames(new));
-fname=fieldnames(new);
-for i=1:length(fname)
-    K=find(~strcmp(fname{i},handles.column));
-    handles.column=handles.column(K);
-end
-inp1=handles.column;
-
-if aa==1 & aa==b | bb==1 & a==1; inp1=handles.column'; end
-nomi=[inp1 ; fieldnames(new)];
-
-handles.column=[];
-handles.column=nomi';
-
-nomi2=fieldnames(new);
-for i=1:length(nomi2)
-    eval(['handles.' char(nomi2(i)) '=new.' char(nomi2(i)) ';'])
-end
-
-h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column)
-h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column)
-h_=findobj('Tag','edit3LB'); set(h_,'String',handles.column)
-
-
-handles.Done=1;
-handles.new=fieldnames(new)';
-guidata(hObject, handles);
-plotta_ora(handles)
+    guidata(hObject, handles);
+    plotta_ora(handles)
 end
 %% generate unwrap
 % --- Executes on button press in pushbutton22.

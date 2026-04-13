@@ -24,6 +24,8 @@ function new_handles = calibrate_data(handles, cal_params)
 
 new_handles = handles; % Inizia con la struttura esistente
 
+disp('Starting full data calibration...');
+
 % Rimuovi i campi 'smooth' e 'new' precedenti
 if any(strcmp(fieldnames(new_handles),'smooth'))
     nomi = new_handles.column;
@@ -120,6 +122,7 @@ cal.BigMotorTorque=[58.018 0];
 new = struct();
 
 %% calculate normal stress
+disp(' -> Calculating Normal Stress...');
 b=(strfind(new_handles.column,'Axial')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
 for j=1:length(n)
@@ -128,6 +131,7 @@ end
 
 %% correct the normal stress with springs elasticity
 if cal_params.is_GH
+    disp(' -> Correcting Normal Stress for Gouge Holder...');
     x=new_handles.LVDT-new_handles.LVDT(1);
     a=abs(x- 5.37);
     Ia=find(a==min(a),1,'first');
@@ -141,31 +145,43 @@ end
 
 %% calibrate optional sensors
 for L=1:18
-    b=strfind(new_handles.column,strcat('AI',num2str(L))); j=0; n=[];
-    for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-    for j=1:length(n)
-        switch AIstate(L)
-            case 2 % Cosino
-                new.InternalPressure=new_handles.(new_handles.column{n(j)})*cal.cosino(1)+cal.cosino(2);
-            case 3 % TC
-                new.InternalTemperature=calibrate_temperature_fx(120,new_handles.(new_handles.column{n(j)}),[],[]);
-            case 4 % Vacuum (Ceriani)
-                new.ChamberPressure=10.^(new_handles.(new_handles.column{n(j)})*cal.ceriani(1)+cal.ceriani(2));
-            case 5 % IscoP
-                new.PumpPressure=new_handles.(new_handles.column{n(j)})*cal.iscoP(1)+cal.iscoP(2);
-            case 6 % IscoV
-                new.PumpVolume=new_handles.(new_handles.column{n(j)})*cal.iscoV(1)+cal.iscoV(2);
-            case 7 % IscoF
-                new.PumpFlow=new_handles.(new_handles.column{n(j)})*cal.iscoF(1)+cal.iscoF(2);
-            case 8 % FtutaRH
-                new.ProbeH=new_handles.(new_handles.column{n(j)})*cal.FtutaRH(1)+cal.FtutaRH(2);
-            case 9 % FtutaT
-                new.ProbeT=new_handles.(new_handles.column{n(j)})*cal.FtutaT(1)+cal.FtutaT(2);
-            case 10 % Other
-                new.Other=new_handles.(new_handles.column{n(j)})*cal.other(1)+cal.other(2);
-            case 11 % BigMotorTorque
-                new.BigMotorTorque=new_handles.(new_handles.column{n(j)})*cal.BigMotorTorque(1)+cal.BigMotorTorque(2);
-                new.BigMotorShearStress=abs(new.BigMotorTorque)*3/2/pi/(rext^3-rint^3)*1E-6;
+    if AIstate(L) > 1
+        b=strfind(new_handles.column,strcat('AI',num2str(L))); j=0; n=[];
+        for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+        for j=1:length(n)
+            switch AIstate(L)
+                case 2 % Cosino
+                    disp('    - Calibrating Internal Pressure (Cosino)...');
+                    new.InternalPressure=new_handles.(new_handles.column{n(j)})*cal.cosino(1)+cal.cosino(2);
+                case 3 % TC
+                    disp('    - Calibrating Internal Temperature (TC)...');
+                    new.InternalTemperature=calibrate_temperature_fx(120,new_handles.(new_handles.column{n(j)}),[],[]);
+                case 4 % Vacuum (Ceriani)
+                    disp('    - Calibrating Chamber Pressure (Vacuum)...');
+                    new.ChamberPressure=10.^(new_handles.(new_handles.column{n(j)})*cal.ceriani(1)+cal.ceriani(2));
+                case 5 % IscoP
+                    disp('    - Calibrating Pump Pressure (IscoP)...');
+                    new.PumpPressure=new_handles.(new_handles.column{n(j)})*cal.iscoP(1)+cal.iscoP(2);
+                case 6 % IscoV
+                    disp('    - Calibrating Pump Volume (IscoV)...');
+                    new.PumpVolume=new_handles.(new_handles.column{n(j)})*cal.iscoV(1)+cal.iscoV(2);
+                case 7 % IscoF
+                    disp('    - Calibrating Pump Flow (IscoF)...');
+                    new.PumpFlow=new_handles.(new_handles.column{n(j)})*cal.iscoF(1)+cal.iscoF(2);
+                case 8 % FtutaRH
+                    disp('    - Calibrating Probe Humidity (FtutaRH)...');
+                    new.ProbeH=new_handles.(new_handles.column{n(j)})*cal.FtutaRH(1)+cal.FtutaRH(2);
+                case 9 % FtutaT
+                    disp('    - Calibrating Probe Temperature (FtutaT)...');
+                    new.ProbeT=new_handles.(new_handles.column{n(j)})*cal.FtutaT(1)+cal.FtutaT(2);
+                case 10 % Other
+                    disp('    - Calibrating Other sensor...');
+                    new.Other=new_handles.(new_handles.column{n(j)})*cal.other(1)+cal.other(2);
+                case 11 % BigMotorTorque
+                    disp('    - Calibrating Big Motor Torque...');
+                    new.BigMotorTorque=new_handles.(new_handles.column{n(j)})*cal.BigMotorTorque(1)+cal.BigMotorTorque(2);
+                    new.BigMotorShearStress=abs(new.BigMotorTorque)*3/2/pi/(rext^3-rint^3)*1E-6;
+            end
         end
     end
 end
@@ -174,6 +190,7 @@ end
 popupPF = cal_params.popup_PF_index;
 switch popupPF
     case 2 % Gefran
+        disp(' -> Calculating Pore Fluid Pressure (Gefran)...');
         if contents>=12; b=(strfind(new_handles.column,'GefranPressure'));
         elseif contents<=11; b=(strfind(new_handles.column,'FluidPressure'));
         else b=strfind(new_handles.column,'IO');
@@ -185,6 +202,7 @@ switch popupPF
             new.EffPressure=new.Normal-new.Pf;
         end
     case 3 % Gems
+        disp(' -> Calculating Pore Fluid Pressure (Gems)...');
         b=strfind(new_handles.column,'GEMS'); j=0; n=[];
         for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
         for j=1:length(n)
@@ -192,6 +210,7 @@ switch popupPF
             new.EffPressure=new.Normal-new.Pf;
         end
     case 4 % IscoPump
+        disp(' -> Calculating Pore Fluid Pressure (IscoPump)...');
         gigione=input('What is the exact name of Isco Pump vector? ','s');
         b=strfind(new_handles.column,gigione); j=0; n=[];
         for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
@@ -205,6 +224,7 @@ end
 popupPC = cal_params.popup_PC_index;
 switch popupPC
     case 2 % Gefran
+        disp(' -> Calculating Confining Pressure (Gefran)...');
         if contents>=12; b=(strfind(new_handles.column,'GefranPressure'));
         elseif contents<=11; b=(strfind(new_handles.column,'FluidPressure'));
         else b=strfind(new_handles.column,'IO');
@@ -215,12 +235,14 @@ switch popupPC
             new.Pc=new_handles.(new_handles.column{n(j)})*cal.fluids(1);
         end
     case 3 % Gems
+        disp(' -> Calculating Confining Pressure (Gems)...');
         b=strfind(new_handles.column,'GEMS'); j=0; n=[];
         for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
         for j=1:length(n)
             new.Pc=new_handles.(new_handles.column{n(j)})*3.15911 - 2.557;
         end
     case 4 % IscoPump
+        disp(' -> Calculating Confining Pressure (IscoPump)...');
         gigione=input('What is the exact name of Isco Pump vector? ','s');
         b=strfind(new_handles.column,gigione); j=0; n=[];
         for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
@@ -230,6 +252,7 @@ switch popupPC
 end
 
 %% calculation of velocity and slip
+disp(' -> Calculating Slip and Velocity from Encoders...');
 node = str2num(cal_params.node1_str);
 node1=node(:,1); f1crat=node(:,2);
 node = str2num(cal_params.node2_str);
@@ -305,6 +328,7 @@ for j=1:length(n)
 end
 
 %% calibrate LVDT
+disp(' -> Calibrating LVDT...');
 b=(strfind(new_handles.column,'LVDT')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
 for j=1:length(n)
@@ -315,6 +339,7 @@ for j=1:length(n)
 end
 
 %% calibrate Torque, calculate shear and mu/effective mu
+disp(' -> Calculating Shear Stress and Friction...');
 b=(strfind(new_handles.column,'Torque')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
 for j=1:length(n)
@@ -334,6 +359,7 @@ end
 
 %% import the thermocouple recording
 if cal_params.is_TC && isempty(dir('*TC'))==0
+    disp(' -> Importing thermocouple data...');
     try
         filname=dir('*TC');
         if length(filname) > 1
@@ -359,6 +385,7 @@ if cal_params.is_TC && isempty(dir('*TC'))==0
 end
 
 %% Estimate temperature
+disp(' -> Estimating Temperature from mechanical data...');
 dn=50;
 time2=cumsum(new_handles.Stamp);
 if any(strcmp(fieldnames(new),'vel'))
@@ -372,11 +399,13 @@ new.TempE=interp1(time2(1:dn:end),Temp,time2);
 
 %% calibrate the vacuum gauge
 if cal_params.is_vac
+    disp(' -> Calibrating vacuum gauge...');
     new.VAC=10.^(new_handles.TA*1.667-9.333);
 end
 
 %% calculate gouge layer thickness
 if cal_params.is_thickness
+    disp(' -> Calculating gouge layer thickness...');
     ztl = cal_params.ztl;
     zts = cal_params.zts;
     
@@ -395,6 +424,7 @@ end
 
 %% import the GEF data
 if cal_params.is_gefran
+    disp(' -> Importing and processing GEFRAN data...');
     I=find(abs(new_handles.timeGEF)==min(abs(new_handles.timeGEF))); if isempty(I); I=1; end
     J=find(abs(new_handles.Time)==min(abs(new_handles.Time))); if isempty(J); J=1; end
     
@@ -434,5 +464,7 @@ new_handles.column = [new_handles.column, new_fnames'];
 
 new_handles.Done=1;
 new_handles.new=new_fnames;
+
+disp('Full data calibration complete.');
 
 end
