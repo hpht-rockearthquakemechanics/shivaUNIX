@@ -131,15 +131,17 @@ end
 
 %% correct the normal stress with springs elasticity
 if cal_params.is_GH
-    disp(' -> Correcting Normal Stress for Gouge Holder...');
-    x=new_handles.LVDT-new_handles.LVDT(1);
-    a=abs(x- 5.37);
-    Ia=find(a==min(a),1,'first');
-    new.dspring=(x - x(Ia))*cal.lv(1);
-    new.dspring(1:Ia)=0;
-    
-    if contents>=11; new.NormalGH=(-7.93457*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000; %MPa
-    else new.NormalGH=(2.5*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000;
+    if isfield(new_handles,"Axial") && isfield(new_handles,"LVDT")
+        disp(' -> Correcting Normal Stress for Gouge Holder...');
+        x=new_handles.LVDT-new_handles.LVDT(1);
+        a=abs(x- 5.37);
+        Ia=find(a==min(a),1,'first');
+        new.dspring=(x - x(Ia))*cal.lv(1);
+        new.dspring(1:Ia)=0;
+
+        if contents>=11; new.NormalGH=(-7.93457*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000; %MPa
+        else new.NormalGH=(2.5*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000;
+        end
     end
 end
 
@@ -398,7 +400,7 @@ end
 new.TempE=interp1(time2(1:dn:end),Temp,time2);
 
 %% calibrate the vacuum gauge
-if cal_params.is_vac
+if cal_params.is_vac & isfield(new_handles,"TA")
     disp(' -> Calibrating vacuum gauge...');
     new.VAC=10.^(new_handles.TA*1.667-9.333);
 end

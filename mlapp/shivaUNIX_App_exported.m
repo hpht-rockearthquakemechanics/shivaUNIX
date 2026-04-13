@@ -1099,50 +1099,23 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to offset_1 (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-
+            
+            % 1. Interazione con l'utente
             app.figure1.WindowStyle = 'normal';
-            [sel,v] = listdlg('PromptString','Select a file:',...
+            [sel, ~] = listdlg('PromptString','Select columns to offset:',...
                 'SelectionMode','multiple',...
                 'ListString',handles.column);
             app.figure1.WindowStyle = 'alwaysontop';
-
-            h_=handles.column(sel);
-            hOb=app.XLab;
-            h_ele=get(hOb,'Value');
-            % htype=get(hOb,'Value');
+            if isempty(sel)
+                return; % L'utente ha annullato
+            end
+            
+            disp('Select a point on the plot to use as zero-offset...');
             [xi,yi]=ginput(1);
-            ll=trovaasse(app, handles.axes1,xi);
+            offset_index = trovaasse(app, handles.axes1, xi);
 
-            ax_=get(gcf,'CurrentAxes');
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');']);
-                if s==1; break; end
-            end
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
-
-
-            eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-            colonna=str2double(get(h_,'Value'));                        %numero della colonna
-
-            for n=sel
-                eval(['handles.' handles.column{n} ' =handles.' handles.column{n} '-handles.' handles.column{n} '(ll(:,1),:);']);
-                %eval(['handles.' handles.column{n} '(1:ll(:,1),:)=0;'])
-            end
-
-            nsel=find(strcmp(handles.column(sel),'Axial'));
-            if isempty(nsel)
-                handles.shearT=handles.RateZero(ll);
-            else
-                handles.loadT=handles.RateZero(ll);
-            end
-
-            h_=findobj('Tag','edit1');
-            s1=str2double(get(h_,'Value'));
-            h_=findobj('Tag','edit2');
-            s2=str2double(get(h_,'Value'));
-            h_=findobj('Tag','edit3');
-            s3=str2double(get(h_,'Value'));
+            % 2. Chiama la funzione esterna
+            handles = apply_offset(handles, sel, offset_index);
 
             guidata(hObject, handles);
             plotta_ora(app, handles);
@@ -1361,24 +1334,10 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to pushbutton22 (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
+            
+            % Chiama la funzione esterna
+            handles = unwrap_encoder(handles);
 
-            b=(strfind(handles.column,'Encoder2')); j=0; n=[];
-            for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-            for j=1
-                new.Encoder2=unwrap(handles.(handles.column{n(j)}));
-            end
-
-            handles.Encoder2=new.Encoder2;
-
-            % handles.column
-            clear handles.new
-
-            h_=findobj('Tag','edit1LB'); set(h_,'Value',handles.column)
-            h_=findobj('Tag','edit2LB'); set(h_,'Value',handles.column)
-            h_=findobj('Tag','edit3LB'); set(h_,'Value',handles.column)
-
-
-            handles.Done=1;
             guidata(hObject, handles);
             plotta_ora(app, handles);
         end
@@ -1418,35 +1377,23 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to running (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-            hOb=app.XLab;
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
+            disp('Select start and end points for running mean calculation...');
             t_cut=trovadataX(app, handles.axes1);
-            [xi,yi]=ginput(2);
-            mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-            mat(2,:)=abs(t_cut-ones(size(t_cut))*xi(2));
-            ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-            ll(:,2)=find(mat(2,:)==min(mat(2,:)));
-
+            [xi,~]=ginput(2);
+            mat(1,:)=abs(t_cut - xi(1));
+            mat(2,:)=abs(t_cut - xi(2));
+            range_indices(1)=find(mat(1,:)==min(mat(1,:)), 1);
+            range_indices(2)=find(mat(2,:)==min(mat(2,:)), 1);
+            
             ax_=get(gcf,'CurrentAxes');
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-                if s==1; break; end
-            end
-            finestra=n;
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
-
-            % eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
+            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
             h_ = app.(['edit',num2str(n)]); %n=numero asse
             s=str2double(get(h_,'Value'));                        %numero della colonna
 
-            %cla
-            x_variable = strsplit(app.XLab.Value, ' '); x_variable{1};
-
-            eval(['mmed_torq=mean(smooth(handles.' handles.column{s} '(ll(:,1):ll(:,2),:)));']);
-            eval(['handles.' handles.column{s} '=handles. ' handles.column{s} '- mmed_torq;']);
-            plot(handles.(x_variable{1}),handles.(handles.column{s}),'ob','parent',handles.(['axes',num2str(finestra)]));
-            set(ax_,'Xlim',posx)
+            % 2. Chiama la funzione esterna
+            handles = apply_running_mean(handles, s, range_indices);
 
             guidata(hObject, handles);
             plotta_ora(app, handles);
@@ -1651,53 +1598,35 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to trigger (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-            hOb=app.XLab;
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
             t_cut=trovadataX(app, handles.axes1);
+            trigger_index = [];
 
-            A=find(strcmp(fieldnames(handles),'shearT'));
-            if isempty(A)
-                [xi,yi]=ginput(1) ;
-                mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-                ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-            else
-                prev_trig=find(handles.RateZero==handles.shearT);
-                k=menu(['trigger is' num2str(handles.shearT) '. Is that ok?'],'si','no','man');
-
-                if (k==1)
-                    ll(:,1)=prev_trig;
-                elseif (k==2)
-                    [xi,yi]=ginput(1) ;
-                    mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-                    ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-                elseif (k==3)
-                    t_cut=handles.XLab;
-                    [xi]=input('digit a triggering number here = ') ;
-                    mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-                    ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-
+            if isfield(handles, 'shearT') && handles.shearT > 0
+                prev_trig = find(handles.RateZero == handles.shearT, 1);
+                k = menu(['Trigger is at ' num2str(handles.shearT) '. Is that ok?'], 'Yes', 'No, select new', 'Manual input');
+                if k == 1
+                    trigger_index = prev_trig;
+                elseif k == 2
+                    disp('Select a new trigger point on the plot...');
+                    [xi, ~] = ginput(1);
+                    trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
+                elseif k == 3
+                    xi = input('Enter a trigger value for the X-axis: ');
+                    trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
                 end
+            else
+                disp('Select a trigger point on the plot...');
+                [xi, ~] = ginput(1);
+                trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
             end
-            handles.triggered=handles.RateZero(ll);
 
-            %cycle if running in t=0
-            %for n=1:length(handles.column)
-            I(1)=find(strcmp(handles.column,'Rate'));
-
-            %for n=I
-            %eval(['handles.' handles.column{n} ' =handles.' handles.column{n} '-handles.' handles.column{n} '(ll(:,1),:);'])
-            %endhandle
-            handles.Time=handles.Time-handles.Time(ll(:,1),:);
-
-            set(hOb,'Value',hOb.Items(2))
-
-
-            ax_=get(handles.axes1,'Children'); dataY=get(ax_,'YData'); dataX=get(ax_,'XData');
-            set(ax_,'XData',handles.Time,'YData',dataY); set(handles.axes1,'XLim',[handles.Time(1) handles.Time(end)]);
-            ax_=get(handles.axes2,'Children'); dataY=get(ax_,'YData'); dataX=get(ax_,'XData');
-            set(ax_,'XData',handles.Time,'YData',dataY); set(handles.axes1,'XLim',[handles.Time(1) handles.Time(end)]);
-            ax_=get(handles.axes3,'Children'); dataY=get(ax_,'YData'); dataX=get(ax_,'XData');
-            set(ax_,'XData',handles.Time,'YData',dataY); set(handles.axes1,'XLim',[handles.Time(1) handles.Time(end)]);
+            % 2. Chiama la funzione esterna
+            if ~isempty(trigger_index)
+                handles = apply_trigger(handles, trigger_index);
+                app.XLab.Value = app.XLab.Items{2}; % Imposta l'asse X su 'Time'
+            end
 
             guidata(hObject, handles);
             plotta_ora(app, handles);
