@@ -998,28 +998,22 @@ function cut_Callback(hObject, eventdata, handles)
 % hObject    handle to cut (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-hOb=findobj('Tag','XLab');
-h_ele=get(hOb,'Value');
-t_cut=trovadataX(handles.axes1);
+    
+    % 1. Interazione con l'utente
+    disp('Select start and end points for cutting data...');
+    t_cut = trovadataX(handles.axes1);
+    [xi, ~] = ginput(2);
 
-%left to right clicking sequence on plot
-[xi,yi]=ginput(2) ;
+    mat(1,:) = abs(t_cut - xi(1));
+    mat(2,:) = abs(t_cut - xi(2));
+    range_indices(1) = find(mat(1,:) == min(mat(1,:)), 1);
+    range_indices(2) = find(mat(2,:) == min(mat(2,:)), 1);
 
-mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-mat(2,:)=abs(t_cut-ones(size(t_cut))*xi(2));
-ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-ll(:,2)=find(mat(2,:)==min(mat(2,:)));
+    % 2. Chiama la funzione esterna
+    handles = cut_data_range(handles, sort(range_indices));
 
-handles.cutted(1,1)=handles.RateZero(ll(1,1));
-handles.cutted(1,2)=handles.RateZero(ll(1,2));
-
-for n=1:length(handles.column)
-    eval(['handles.' handles.column{n} ' =handles.' handles.column{n} '(ll(:,1):ll(:,2),:);' ])
-end
-
-
-guidata(hObject, handles);
-plotta_ora(handles)
+    guidata(hObject, handles);
+    plotta_ora(handles)
 end
 
 %% --- Executes on button press in fft.
@@ -1027,48 +1021,28 @@ function fft_Callback(hObject, eventdata, handles)
 % hObject    handle to fft (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-hOb=findobj('Tag','XLab');
-h_ele=get(hOb,'Value');
-t_cut=trovadataX(handles.axes1);
+    
+    % 1. Interazione con l'utente
+    disp('Click on the plot to select the data segment for FFT...');
+    ginput(1);
+    ax_ = get(gcf, 'CurrentAxes');
+    [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
+    if n == 0, return; end
 
-ax_=get(gcf,'CurrentAxes');
+    t_cut = trovadataX(ax_);
+    posx = get(ax_, 'XLim');
+    I1 = find(abs(t_cut - posx(1)) == min(abs(t_cut - posx(1))), 1);
+    I2 = find(abs(t_cut - posx(2)) == min(abs(t_cut - posx(2))), 1);
+    
+    h_ = findobj('Tag', ['edit' num2str(n)]);
+    s = str2double(get(h_, 'String'));
 
-ginput(1)
-for n=1:3
-    eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-    if s==1; break; end
-end
-finestra=n;
+    % 2. Chiama la funzione esterna
+    target_axes.axes4 = handles.axes4;
+    target_axes.axes5 = handles.axes5;
+    apply_fft(handles, s, [I1, I2], target_axes);
 
-ax_=get(gcf,'CurrentAxes');
-posy=get(ax_,'Ylim');
-posx=get(ax_,'Xlim');
-I1=find(abs(t_cut-posx(1))==min(abs(t_cut-posx(1))));
-I2=find(abs(t_cut-posx(2))==min(abs(t_cut-posx(2))));
-
-eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-s=str2double(get(h_,'String'));  %numero della colonna
-
-eval(['mmed_torq=mean(smooth(handles.' handles.column{s} '(1:100,:)));']);
-eval(['handles.' handles.column{s} '=handles.' handles.column{s} '- mmed_torq;']);
-
-%tapering
-
-eval(['handles.' handles.column{s} '=handles.' handles.column{s} '(I1:I2).*hamming(length(handles.Stamp(I1:I2)));'])
-dt=mode(handles.Stamp(I1:I2)); %str2double(get(h_,'String'));
-
-nfft=4096;
-eval(['Y =fft(handles.' handles.column{s} ',' num2str(nfft) ');'])
-f = 1000/dt*(0:nfft/2)/nfft;
-Pyy = Y.* conj(Y) / nfft;
-
-plot(f,Pyy(1:nfft/2+1),'Parent',handles.axes4);
-set(handles.axes4,'XLim',[0 250])
-
-plot(1./f*1000/dt,Pyy(1:nfft/2+1),'Parent',handles.axes5);
-set(handles.axes5,'XLim',[0 500])
-
-set(hObject,'Value',0)
+    set(hObject, 'Value', 0);
 end
 % --------------------------------------------------------------------
 %% --------------------------------------------------------------------
@@ -1226,57 +1200,39 @@ function outlayers_Callback(hObject, eventdata, handles)
 % hObject    handle to outlayers (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-%zoom xon;
-hOb=findobj('Tag','XLab');
-h_ele=get(hOb,'Value');
-t_cut=trovadataX(handles.axes1);
-
-button=1; i=0;
-while button==1
-    i=i+1
-    [xi(i),yi,button]=ginput(1) ;
-    button
-end
-
-ax_=get(gcf,'CurrentAxes');
-for n=1:3
-    eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-    if s==1; break; end
-end
-finestra=n;
-posy=get(ax_,'Ylim');
-posx=get(ax_,'Xlim');
-
-eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-s=str2double(get(h_,'String'));  %numero della colonna
-
-
-for i=1:length(xi);
-    mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(i));
-    ll(i)=find(mat(1,:)==min(mat(1,:)),1,'first');
-end
-
-if button==3
     
-    for i=1:length(xi);
-    %running mean    
-        if ll==1; eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)+1);']);
-        else
-            eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)-1);']);
-        end
-        
+    % 1. Interazione con l'utente
+    disp('Click on outliers. Right-click to replace individual points, middle-click for a range. Press Enter to finish.');
+    t_cut = trovadataX(handles.axes1);
+    
+    button = 1;
+    xi = [];
+    while button == 1
+        [x, ~, b] = ginput(1);
+        if isempty(b) || b > 1, break; end % Termina con Enter o altri tasti
+        button = b;
+        xi(end+1) = x;
     end
-    
-    
-elseif button==2
-    eval(['handles.' handles.column{s} '(ll(1):ll(end))=handles.' handles.column{s} '(ll(1)-1);']);
-    
-end %if button
+    final_button = b; % L'ultimo tasto premuto
 
-guidata(hObject, handles);
+    if isempty(xi), return; end
 
-plotta_ora(handles)
+    ax_ = get(gcf, 'CurrentAxes');
+    [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
+    h_ = findobj('Tag', ['edit' num2str(n)]);
+    s = str2double(get(h_, 'String'));
+    
+    % Trova l'indice per ogni punto cliccato
+    ll = zeros(1, length(xi));
+    for k = 1:length(xi)
+        [~, ll(k)] = min(abs(t_cut - xi(k)));
+    end
+
+    % 2. Chiama la funzione esterna
+    handles = remove_outliers(handles, s, ll, final_button);
+
+    guidata(hObject, handles);
+    plotta_ora(handles)
 end
 
 % --- Executes on selection change in edit1LB.
@@ -1859,11 +1815,8 @@ function off_enc_0_Callback(hObject, eventdata, handles)
 % hObject    handle to off_enc_0 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-I=handles.triggered;
-handles.Encoder2(1:I)=0;
-handles.Encoder(1:I)=0;
-guidata(hObject, handles);
+    handles = offset_encoder_zero(handles);
+    guidata(hObject, handles);
 end
 % --- Executes on button press in incremental.
 function incremental_Callback(hObject, eventdata, handles)
@@ -2239,6 +2192,7 @@ function pushbutton20_Callback(hObject, eventdata, handles)
     cal_params.is_torque_ctrl = get(findobj('Tag','Torque'),'Value');
     cal_params.popup_PF_index = get(findobj('Tag','popupPF'),'Value');
     cal_params.popup_PC_index = get(findobj('Tag','popupPC'),'Value');
+    cal_params.is_incremental = get(findobj('Tag','incremental'),'Value');
     
     cal_params.AI_states = zeros(1,18);
     for L=1:18
@@ -2298,27 +2252,25 @@ function filtvel_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     
-% 1. User interaction to get the transition index
-transition_index = [];
-if isfield(handles, 'XIin')
-    response = questdlg('A transition index already exists. Change it?', 'Filter Velocity', 'Yes', 'No', 'No');
-    if strcmp(response, 'No')
-        transition_index = handles.XIin;
+    % 1. User interaction to get the transition index
+    transition_index = [];
+    if isfield(handles, 'XIin')
+        response = questdlg('A transition index already exists. Change it?', 'Filter Velocity', 'Yes', 'No', 'No');
+        if strcmp(response, 'No')
+            transition_index = handles.XIin;
+        end
     end
-end
-if and(isfield(handles,"Slip_Enc_1"),isfield(handles,"Slip_Enc_2"))
+    
     if isempty(transition_index)
-
         hf = figure;
         plot(handles.Slip_Enc_1); hold on; plot(handles.Slip_Enc_2);
-        title('Zoom on transition point then press enter to select it');
+        title('Select the transition point between Encoder 1 and 2');
         zoom on;
         waitfor(hf, 'CurrentCharacter', char(13)); % Wait for Enter key
         [xi, ~] = ginput(1);
         transition_index = round(xi);
         handles.XIin = transition_index;
         close(hf);
-
     end
 
     % 2. Call the external function
@@ -2332,9 +2284,6 @@ if and(isfield(handles,"Slip_Enc_1"),isfield(handles,"Slip_Enc_2"))
         h_ = findobj('Tag','edit2LB'); set(h_,'String',handles.column);
         h_ = findobj('Tag','edit3LB'); set(h_,'String',handles.column);
     end
-else
-    disp("No Slip_Enc_1 Slip_Enc_2, perform calibration first")
-end
 
     guidata(hObject, handles);
     plotta_ora(handles);

@@ -705,6 +705,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Value changed function: brutalfilt
         function brutalfilt_Callback(app, event)
+            %% FIT
+
             % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
 
@@ -741,25 +743,19 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to cut (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-            hOb=findobj('Tag','XLab');
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
+            disp('Select start and end points for cutting data...');
             t_cut=trovadataX(app, handles.axes1);
+            [xi, ~] = ginput(2);
 
-            %left to right clicking sequence on plot
-            [xi,yi]=ginput(2) ;
+            mat(1,:) = abs(t_cut - xi(1));
+            mat(2,:) = abs(t_cut - xi(2));
+            range_indices(1) = find(mat(1,:) == min(mat(1,:)), 1);
+            range_indices(2) = find(mat(2,:) == min(mat(2,:)), 1);
 
-            mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(1));
-            mat(2,:)=abs(t_cut-ones(size(t_cut))*xi(2));
-            ll(:,1)=find(mat(1,:)==min(mat(1,:)));
-            ll(:,2)=find(mat(2,:)==min(mat(2,:)));
-
-            handles.cutted(1,1)=handles.RateZero(ll(1,1));
-            handles.cutted(1,2)=handles.RateZero(ll(1,2));
-
-            for n=1:length(handles.column)
-                eval(['handles.' handles.column{n} ' =handles.' handles.column{n} '(ll(:,1):ll(:,2),:);' ])
-            end
-
+            % 2. Chiama la funzione esterna
+            handles = cut_data_range(handles, sort(range_indices));
 
             guidata(hObject, handles);
             plotta_ora(app, handles);
@@ -767,37 +763,21 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Value changed function: cutDt
         function cutDt_Callback(app, event)
-            %% --- Executes on button press in cut_dt
-
-            % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to cut_dt (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
             
             dt_val = str2double(app.cutDt.Value);
             if isempty(dt_val) || isnan(dt_val)
                 disp('Invalid dt value for cutting.');
                 return;
             end
-
             handles = cut_data_by_timestep(handles, dt_val);
-
             guidata(hObject, handles);
             plotta_ora(app, handles);
         end
 
         % Value changed function: decimate
         function decimate_Callback(app, event)
-            %% --- Executes on button press in decimate.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to decimate (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
             if ~isfield(handles,'column') || isempty(handles.column)
                 errordlg('No data loaded to decimate.', 'Data Error');
                 return;
@@ -932,48 +912,28 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to fft (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-            hOb=findobj('Tag','XLab');
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
+            disp('Click on the plot to select the data segment for FFT...');
+            ginput(1);
+            ax_ = get(gcf, 'CurrentAxes');
+            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
+            if n == 0, return; end
+
             t_cut=trovadataX(app, handles.axes1);
+            posx = get(ax_, 'XLim');
+            I1 = find(abs(t_cut - posx(1)) == min(abs(t_cut - posx(1))), 1);
+            I2 = find(abs(t_cut - posx(2)) == min(abs(t_cut - posx(2))), 1);
 
-            ax_=get(gcf,'CurrentAxes');
+            h_ = app.(['edit' num2str(n)]);
+            s = str2double(h_.Value);
 
-            ginput(1)
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-                if s==1; break; end
-            end
-            finestra=n;
+            % 2. Chiama la funzione esterna
+            target_axes.axes4 = app.axes4;
+            target_axes.axes5 = app.axes5;
+            apply_fft(handles, s, [I1, I2], target_axes);
 
-            ax_=get(gcf,'CurrentAxes');
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
-            I1=find(abs(t_cut-posx(1))==min(abs(t_cut-posx(1))));
-            I2=find(abs(t_cut-posx(2))==min(abs(t_cut-posx(2))));
-
-            eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-            s=str2double(get(h_,'Value'));  %numero della colonna
-
-            eval(['mmed_torq=mean(smooth(handles.' handles.column{s} '(1:100,:)));']);
-            eval(['handles.' handles.column{s} '=handles.' handles.column{s} '- mmed_torq;']);
-
-            %tapering
-
-            eval(['handles.' handles.column{s} '=handles.' handles.column{s} '(I1:I2).*hamming(length(handles.Stamp(I1:I2)));'])
-            dt=mode(handles.Stamp(I1:I2)); %str2double(get(h_,'Value'));
-
-            nfft=4096;
-            eval(['Y =fft(handles.' handles.column{s} ',' num2str(nfft) ');'])
-            f = 1000/dt*(0:nfft/2)/nfft;
-            Pyy = Y.* conj(Y) / nfft;
-
-            plot(f,Pyy(1:nfft/2+1),'Parent',handles.axes4);
-            set(handles.axes4,'XLim',[0 250])
-
-            plot(1./f*1000/dt,Pyy(1:nfft/2+1),'Parent',handles.axes5);
-            set(handles.axes5,'XLim',[0 500])
-
-            set(hObject,'Value',0)
+            set(hObject, 'Value', 0);
         end
 
         % Value changed function: filtvel
@@ -1039,10 +999,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to off_enc_0 (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-
-            I=handles.triggered;
-            handles.Encoder2(1:I)=0;
-            handles.Encoder(1:I)=0;
+            handles = offset_encoder_zero(handles);
             guidata(hObject, handles);
         end
 
@@ -1091,56 +1048,33 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to outlayers (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-
-            %zoom xon;
-            hOb=findobj('Tag','XLab');
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
+            disp('Click on outliers. Right-click to replace individual points, middle-click for a range. Press Enter to finish.');
             t_cut=trovadataX(app, handles.axes1);
 
-            button=1; i=0;
-            while button==1
-                i=i+1
-                [xi(i),yi,button]=ginput(1) ;
-                button
+            button = 1;
+            xi = [];
+            while button == 1
+                [x, ~, b] = ginput(1);
+                if isempty(b) || b > 1, break; end
+                button = b;
+                xi(end+1) = x;
             end
+            final_button = b;
 
-            ax_=get(gcf,'CurrentAxes');
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-                if s==1; break; end
-            end
-            finestra=n;
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
+            if isempty(xi), return; end
 
-            eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-            s=str2double(get(h_,'Value'));  %numero della colonna
-
-
-            for i=1:length(xi);
-                mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(i));
-                ll(i)=find(mat(1,:)==min(mat(1,:)),1,'first');
-            end
-
-            if button==3
-
-                for i=1:length(xi);
-                    %running mean
-                    if ll==1; eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)+1);']);
-                    else
-                        eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)-1);']);
-                    end
-
-                end
-
-
-            elseif button==2
-                eval(['handles.' handles.column{s} '(ll(1):ll(end))=handles.' handles.column{s} '(ll(1)-1);']);
-
-            end %if button
+            ax_ = get(gcf, 'CurrentAxes');
+            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
+            h_ = app.(['edit' num2str(n)]);
+            s = str2double(h_.Value);
+            
+            [~, ll] = min(abs(t_cut' - xi));
+            % 2. Chiama la funzione esterna
+            handles = remove_outliers(handles, s, ll, final_button);
 
             guidata(hObject, handles);
-
             plotta_ora(app, handles);
         end
 
@@ -1260,6 +1194,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             cal_params.is_torque_ctrl = app.Torque.Value;
             cal_params.popup_PF_index = find(strcmp(app.popupPF.Items, app.popupPF.Value));
             cal_params.popup_PC_index = find(strcmp(app.popupPC.Items, app.popupPC.Value));
+            cal_params.is_incremental = app.incremental.Value;
             
             AIstate=zeros(1,18);
             for L=1:18
@@ -1615,56 +1550,38 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to outlayers (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-
-            %zoom xon;
-            hOb=findobj('Tag','XLab');
-            h_ele=get(hOb,'Value');
+            
+            % 1. Interazione con l'utente
+            disp('Click on outliers. Right-click to replace individual points, middle-click for a range. Press Enter to finish.');
             t_cut=trovadataX(app, handles.axes1);
 
-            button=1; i=0;
-            while button==1
-                i=i+1
-                [xi(i),yi,button]=ginput(1) ;
-                button
+            button = 1;
+            xi = [];
+            while button == 1
+                [x, ~, b] = ginput(1);
+                if isempty(b) || b > 1, break; end
+                button = b;
+                xi(end+1) = x;
             end
+            final_button = b;
 
-            ax_=get(gcf,'CurrentAxes');
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-                if s==1; break; end
+            if isempty(xi), return; end
+
+            ax_ = get(gcf, 'CurrentAxes');
+            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
+            h_ = app.(['edit' num2str(n)]);
+            s = str2double(h_.Value);
+            
+            % Trova l'indice per ogni punto cliccato
+            ll = zeros(1, length(xi));
+            for k = 1:length(xi)
+                [~, ll(k)] = min(abs(t_cut - xi(k)));
             end
-            finestra=n;
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
-
-            eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-            s=str2double(get(h_,'Value'));  %numero della colonna
-
-
-            for i=1:length(xi);
-                mat(1,:)=abs(t_cut-ones(size(t_cut))*xi(i));
-                ll(i)=find(mat(1,:)==min(mat(1,:)),1,'first');
-            end
-
-            if button==3
-
-                for i=1:length(xi);
-                    %running mean
-                    if ll==1; eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)+1);']);
-                    else
-                        eval(['handles.' handles.column{s} '(ll(i))=handles.' handles.column{s} '(ll(i)-1);']);
-                    end
-
-                end
-
-
-            elseif button==2
-                eval(['handles.' handles.column{s} '(ll(1):ll(end))=handles.' handles.column{s} '(ll(1)-1);']);
-
-            end %if button
+            
+            % 2. Chiama la funzione esterna
+            handles = remove_outliers(handles, s, ll, final_button);
 
             guidata(hObject, handles);
-
             plotta_ora(app, handles);
         end
 
@@ -1784,6 +1701,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             cal_params.is_torque_ctrl = app.Torque.Value;
             cal_params.popup_PF_index = find(strcmp(app.popupPF.Items, app.popupPF.Value));
             cal_params.popup_PC_index = find(strcmp(app.popupPC.Items, app.popupPC.Value));
+            cal_params.is_incremental = app.incremental.Value;
             
             AIstate=zeros(1,18);
             for L=1:18
@@ -2011,64 +1929,23 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % handles    structure with handles and user data (see GUIDATA)
 
             % Hints: get(hObject,'Value') returns contents of smooth as text
-            %        str2double(get(hObject,'Value')) returns contents of smooth as a double
+            %        str2double(get(hObject,'Value')) returns contents of smooth as a double            
+            window_size = str2double(app.smooth.Value);
+            if isempty(window_size) || isnan(window_size); window_size = 500; end
 
-            set(hObject,'Enable','on','BackGroundColor','white')
-            handles.sm=str2num(app.smooth.Value);
-
-            if isempty(handles.sm); handles.sm=500; end
+            disp('Select an axis to apply smoothing...');
             ginput(1)
             ax_=get(gcf,'CurrentAxes');
+            [~, axis_idx] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
 
-            for n=1:3
-                eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-                if s==1; break; end
+            if axis_idx > 0
+                h_ = app.(['edit' num2str(axis_idx)]);
+                col_idx = str2double(get(h_, 'Value'));
+                
+                handles = apply_smoothing(handles, col_idx, window_size);
             end
-            finestra=n;
-
-            posy=get(ax_,'Ylim');
-            posx=get(ax_,'Xlim');
-
-            h_=app.(['edit',num2str(n)]); %n=numero asse
-            s=str2double(get(h_,'Value'));  %numero della colonna
-
-            %if any(strcmp(handles.column,{[handles.column{s} 'o']}));
-            %s=find(strcmp(handles.column,{[handles.column{s} 'o']}));
-            %end
-
-            %running mean
-            eval(['pippo=(handles.' handles.column{s} ');']);
-            if (handles.sm)/2==floor(handles.sm/2); handles.sm=handles.sm+1; end %check sul numero dispari
-            l=(handles.sm-1)/2; %es:(101-1)/2=50;
-
-            pm=pippo(l+1:length(pippo)-l);
-            for i=l+1:length(pippo)-l;
-                pm(i-l)=sum(pippo(i-l:i+l));
-            end
-            pippo(l+1:length(pippo)-l)=pm/(handles.sm);
-
-            %windowSize = handles.sm;
-            %pm2=filter(ones(1,windowSize)/windowSize,1,pippo);
-            %smooths data Y using a handles.sm -point moving average.
-            %eval(['handles.' handles.column{s} '=smooth(handles.' handles.column{s} ',handles.sm);'])
-
-            eval(['handles.' handles.column{s} 'o=handles.' handles.column{s} ';'])
-            eval(['handles.' handles.column{s} '=pippo;'])
-            if ~strcmp(handles.column,{[handles.column{s} 'o']});
-                handles.column(end+1)={[handles.column{s} 'o']};
-            end
-
-
-            %handles.g1=find(strcmp(handles.column,{[handles.column{s} 'smooth']}));
-
-            h_=findobj('Tag','edit1LB'); set(h_,'Value',handles.column);
-            h_=findobj('Tag','edit2LB'); set(h_,'Value',handles.column);
-            h_=findobj('Tag','edit3LB'); set(h_,'Value',handles.column);
-
-
 
             guidata(hObject, handles);
-
             plotta_ora(app, handles);
         end
 

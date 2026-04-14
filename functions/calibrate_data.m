@@ -9,7 +9,7 @@ function new_handles = calibrate_data(handles, cal_params)
 %   cal_params: (struct) Una struttura contenente i parametri necessari per la calibrazione.
 %               Campi richiesti:
 %               .rint, .rext, .calibration_index, .node1_str, .node2_str,
-%               .maxE_str, .AI_states, .popup_PF_index, .popup_PC_index,
+%               .AI_states, .popup_PF_index, .popup_PC_index, .is_incremental
 %               .is_GH, .is_TC, .is_vac, .is_thickness, .ztl, .zts,
 %               .is_gefran, .is_adjrate, .is_torque_ctrl
 %
@@ -26,7 +26,8 @@ new_handles = handles; % Inizia con la struttura esistente
 
 disp('Starting full data calibration...');
 
-% Rimuovi i campi 'smooth' e 'new' precedenti
+% --- 1. PULIZIA INIZIALE ---
+% Rimuove i campi calcolati in precedenza ('smooth', 'new') per evitare conflitti.
 if any(strcmp(fieldnames(new_handles),'smooth'))
     nomi = new_handles.column;
     for i=1:length(nomi)
@@ -48,6 +49,9 @@ if any(strcmp(fieldnames(new_handles),'new'))
     if any(strcmp(fieldnames(new_handles),'new')); new_handles=rmfield(new_handles,'new');end
 end
 
+% --- 2. IMPOSTAZIONE DEI PARAMETRI DI CALIBRAZIONE ---
+disp(' -> Setting up calibration constants...');
+
 rint = cal_params.rint;
 rext = cal_params.rext;
 contents = cal_params.calibration_index;
@@ -55,6 +59,7 @@ contents = cal_params.calibration_index;
 cal.enc(1:2)=4/3*pi*(rext^2+rint*rext+rint^2)/(rext+rint);
 
 switch contents
+    % Imposta le costanti di calibrazione (tHG, tLG, fref) e corregge il tempo se necessario
     case 1
         disp("Select correct calibration!")
         return
@@ -91,6 +96,7 @@ switch contents
         cal.tHG=0; cal.tLG=0.736e6; fref=100; cal.enc(1)=4/3*pi*(rext^2+rint*rext+rint^2)/(rext+rint)*10;
 end
 
+% Costanti fisse per Strain Gauge, Gems, ecc.
 cal.tSG=17.19E6;
 cal.GEM=3.1;
 cal.gems=[3.15911 -2.557];
@@ -101,10 +107,12 @@ cal.torqueHG(1:12)=cal.tHG*3/2/pi/(rext^3-rint^3)*1E-6;
 cal.torqueLG(1:12)=cal.tLG*3/2/pi/(rext^3-rint^3)*1E-6;
 cal.torqueSG(1:12)=cal.tSG*3/2/pi/(rext^3-rint^3)*1E-6;
 
+% Costante per lo stress assiale
 if contents>=11; cal.ax=-7.93457/pi/(rext^2-rint^2)/1000; %MPa
 else cal.ax=2.5/pi/(rext^2-rint^2)/1000; %MPa
 end
 
+% Costanti per LVDT e fluidi
 cal.lv(1)=5.0634;
 cal.lv(2)=0.3;
 cal.lv(3)=1;
@@ -112,6 +120,7 @@ cal.fluids(1:12)=4; %MPa/mV
 
 AIstate = cal_params.AI_states;
 
+% Costanti per sensori opzionali
 cal.cosino=[9.0067 0.79664];
 cal.ceriani=[1.667 9.333];
 cal.iscoP=[6.879 -0.328];
@@ -124,15 +133,18 @@ cal.BigMotorTorque=[58.018 0];
 
 new = struct();
 
-%% calculate normal stress
+% --- 3. ELABORAZIONE DATI ---
+
+%% 3.1 Calcolo dello Stress Normale
 disp(' -> Calculating Normal Stress...');
 b=(strfind(new_handles.column,'Axial')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
 for j=1:length(n)
+    % Applica la costante di calibrazione per ottenere lo stress normale in MPa
     new.Normal=new_handles.(new_handles.column{n(j)})*cal.ax(1);
 end
 
-%% correct the normal stress with springs elasticity
+%% 3.2 Correzione dello Stress Normale per Gouge Holder (GH)
 if cal_params.is_GH
     if isfield(new_handles,"Axial") && isfield(new_handles,"LVDT")
         disp(' -> Correcting Normal Stress for Gouge Holder...');
@@ -141,14 +153,15 @@ if cal_params.is_GH
         Ia=find(a==min(a),1,'first');
         new.dspring=(x - x(Ia))*cal.lv(1);
         new.dspring(1:Ia)=0;
-
+        
+        % Ricalcola lo stress normale tenendo conto della deformazione delle molle
         if contents>=11; new.NormalGH=(-7.93457*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000; %MPa
         else new.NormalGH=(2.5*new_handles.Axial-(0.2666+0.0501*new.dspring))/pi/(rext^2-rint^2)/1000;
         end
     end
 end
 
-%% calibrate optional sensors
+%% 3.3 Calibrazione dei Sensori Opzionali (AI1-AI18)
 for L=1:18
     if AIstate(L) > 1
         b=strfind(new_handles.column,strcat('AI',num2str(L))); j=0; n=[];
@@ -191,7 +204,7 @@ for L=1:18
     end
 end
 
-%% pore fluid pressure
+%% 3.4 Calcolo della Pressione dei Pori (Pore Fluid Pressure)
 popupPF = cal_params.popup_PF_index;
 switch popupPF
     case 2 % Gefran
@@ -225,7 +238,7 @@ switch popupPF
         end
 end
 
-%% confining pressure
+%% 3.5 Calcolo della Pressione di Confinamento (Confining Pressure)
 popupPC = cal_params.popup_PC_index;
 switch popupPC
     case 2 % Gefran
@@ -256,7 +269,7 @@ switch popupPC
         end
 end
 
-%% calculation of velocity and slip
+%% 3.6 Calcolo di Velocità e Scorrimento (Slip) dagli Encoder
 disp(' -> Calculating Slip and Velocity from Encoders...');
 node = str2num(cal_params.node1_str);
 node1=node(:,1); f1crat=node(:,2);
@@ -269,6 +282,7 @@ for j=1:length(n)
     d0 = new_handles.(new_handles.column{n(j)});
     h_ele = new_handles.Stamp/1000;
     
+    % Correzione del rate se il flag è attivo
     if cal_params.is_adjrate
         I_ele=find(diff(h_ele)<mode(diff(h_ele)));
         if ~isempty(I_ele)
@@ -279,10 +293,30 @@ for j=1:length(n)
         end
     end
     
+    % Correzione per encoder di tipo incrementale se il flag è attivo
+    if cal_params.is_incremental
+        J = local_max(d0); % Funzione helper per trovare massimi locali
+        if length(J) > 10
+            [c,d]=hist(diff(d0(J)));
+            Jc=find(c==max(c));
+            r=abs(diff(d0(J))-d(Jc(1)));
+            In=find(r > mode(diff(d)));
+            I=J(In);
+            for ii=1:length(I)
+                if ii==length(I) && I(ii) + 2 < length(d0)
+                    d0(I(ii)+1:end)=d0(I(ii)+1:end)-d0(I(ii)+2)+d0(I(ii));
+                elseif ii < length(I)
+                    d0(I(ii)+1:I(ii+1))=d0(I(ii)+1:I(ii+1))-d0(I(ii)+2)+d0(I(ii));
+                end
+            end
+        end
+    end
+
     d0(d0<0)=0;
     h=new_handles.Stamp/1000;
     d1=d0*cal.enc(1);
     
+    % Applica un filtro passa-basso se non si è in modalità controllo di torsione
     if ~cal_params.is_torque_ctrl
         fcamp=(1./max(1/fref,h));
         Fs=max(fcamp);
@@ -300,6 +334,7 @@ for j=1:length(n)
         d_sm=d1;
     end
     
+    % Calcola la velocità e lo scorrimento
     bb=diff(d_sm); bb(end+1)=bb(end);
     v=(bb./h)./new_handles.tconv;
     
@@ -307,6 +342,7 @@ for j=1:length(n)
     new.(['Slip_Enc_' num2str(j)]) = d_sm;
     
     if j==1; del0=d_sm; v0=v; end
+    % Combina i dati dei due encoder per ottenere il segnale migliore
     if j==2
         del10=max(d_sm,del0);
         Iv=find(v < 0.01 );
@@ -320,7 +356,7 @@ for j=1:length(n)
             new.vel=v;
         end
         
-        %find outliers in vel
+        % Rimuove eventuali outlier dalla velocità calcolata
         IOL=find(new.vel >=10);
         for i_ol=1:length(IOL)
             new.vel(IOL(i_ol))=new.vel(IOL(i_ol)-1);
@@ -332,7 +368,7 @@ for j=1:length(n)
     end
 end
 
-%% calibrate LVDT
+%% 3.7 Calibrazione degli LVDT
 disp(' -> Calibrating LVDT...');
 b=(strfind(new_handles.column,'LVDT')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
@@ -343,7 +379,7 @@ for j=1:length(n)
     end
 end
 
-%% calibrate Torque, calculate shear and mu/effective mu
+%% 3.8 Calibrazione della Torsione (Torque) e calcolo di Shear Stress e Frizione (Mu)
 disp(' -> Calculating Shear Stress and Friction...');
 b=(strfind(new_handles.column,'Torque')); j=0; n=[];
 for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
@@ -362,7 +398,7 @@ for j=1:length(n)
     end
 end
 
-%% import the thermocouple recording
+%% 3.9 Importazione dei dati da Termocoppia (se presente)
 if cal_params.is_TC && isempty(dir('*TC'))==0
     disp(' -> Importing thermocouple data...');
     try
@@ -389,7 +425,7 @@ if cal_params.is_TC && isempty(dir('*TC'))==0
     end
 end
 
-%% Estimate temperature
+%% 3.10 Stima della Temperatura basata su dati meccanici
 disp(' -> Estimating Temperature from mechanical data...');
 dn=50;
 time2=cumsum(new_handles.Stamp);
@@ -402,13 +438,33 @@ else
 end
 new.TempE=interp1(time2(1:dn:end),Temp,time2);
 
-%% calibrate the vacuum gauge
+%% 3.11 Calibrazione dello Strain Gauge
+b=(strfind(new_handles.column,'StrainGauge')); j=0; n=[];
+for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+for j=1:length(n)
+    new.(['StrainGauge' num2str(j)])=new_handles.(new_handles.column{n(j)})*cal.torqueSG(j);
+    new.(['MuSG' num2str(j)])=new.(['StrainGauge' num2str(j)])./new.Normal;
+end
+
+%% 3.12 Calibrazione dei sensori di umidità e temperatura ambiente
+b=(strfind(new_handles.column,'RH')); j=0; n=[];
+for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+for j=1:length(n)
+    new.HRc=new_handles.(new_handles.column{n(j)})./0.05;
+end
+b=(strfind(new_handles.column,'TA')); j=0; n=[];
+for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+for j=1:length(n)
+    new.TAc=(new_handles.(new_handles.column{n(j)})./0.05)-20;
+end
+
+%% 3.13 Calibrazione del misuratore di vuoto (Vacuum Gauge)
 if cal_params.is_vac & isfield(new_handles,"TA")
     disp(' -> Calibrating vacuum gauge...');
     new.VAC=10.^(new_handles.TA*1.667-9.333);
 end
 
-%% calculate gouge layer thickness
+%% 3.14 Calcolo dello spessore del Gouge Layer
 if cal_params.is_thickness
     disp(' -> Calculating gouge layer thickness...');
     ztl = cal_params.ztl;
@@ -427,7 +483,7 @@ if cal_params.is_thickness
     end
 end
 
-%% import the GEF data
+%% 3.15 Importazione dei dati da GEFRAN (se presente)
 if cal_params.is_gefran
     disp(' -> Importing and processing GEFRAN data...');
     I=find(abs(new_handles.timeGEF)==min(abs(new_handles.timeGEF))); if isempty(I); I=1; end
@@ -453,7 +509,8 @@ if cal_params.is_gefran
     end
 end
 
-%% final routine to update the fields
+%% --- 4. AGGIORNAMENTO FINALE DELLA STRUTTURA DATI ---
+% Aggiunge i nuovi campi calcolati alla struttura 'handles' e aggiorna la lista delle colonne.
 new_fnames = fieldnames(new);
 for i=1:length(new_fnames)
     fname = new_fnames{i};
