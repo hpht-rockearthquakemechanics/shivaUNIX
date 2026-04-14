@@ -55,6 +55,9 @@ contents = cal_params.calibration_index;
 cal.enc(1:2)=4/3*pi*(rext^2+rint*rext+rint^2)/(rext+rint);
 
 switch contents
+    case 1
+        disp("Select correct calibration!")
+        return
     case 2
         cal.tHG=73.86; cal.tLG=cal.tHG; fref=250;
     case 3

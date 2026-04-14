@@ -889,21 +889,14 @@ function decimate_Callback(hObject, eventdata, handles)
 % hObject    handle to decimate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if ~any(strcmp(fieldnames(handles),'column')); err=msgbox('no data stored!'); waitfor(err); return; end
+if ~isfield(handles,'column') || isempty(handles.column); err=msgbox('no data stored!'); waitfor(err); return; end
 
-set(hObject,'Enable','on','BackGroundColor','white')
-handles.Ndec=str2num(get(hObject,'String'))
-%if any(strcmp(fieldnames(handles),'dec')); k=menu('decimate again?','yes','no');end
-%if k==1
-for n=1:length(handles.column)
-    eval(['handles.' handles.column{n} ' = downsample(handles.' handles.column{n} ',' num2str(handles.Ndec) ');'])
+Ndec = str2num(get(hObject,'String'));
+if isempty(Ndec) || Ndec < 1
+    disp('Invalid decimation factor.');
+    return;
 end
-
-%elseif k==2
-%    return
-%end
-
-handles.dec='ok';
+handles = decimate_data(handles, Ndec);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -933,53 +926,25 @@ function smooth_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of smooth as text
 %        str2double(get(hObject,'String')) returns contents of smooth as a double
 
-set(hObject,'Enable','on','BackGroundColor','white')
-handles.sm=str2num(get(hObject,'String'));
+window_size = str2num(get(hObject,'String'));
+if isempty(window_size); window_size = 500; end
 
-if isempty(handles.sm); handles.sm=500; end
+disp('Select an axis to apply smoothing...');
 ginput(1)
 ax_=get(gcf,'CurrentAxes');
+[~, axis_idx] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
 
-for n=1:3
-    eval(['s=find(ax_==handles.axes' num2str(n) ');'])
-    if s==1; break; end
+if axis_idx > 0
+    h_ = findobj('Tag', ['edit' num2str(axis_idx)]);
+    col_idx = str2double(get(h_, 'String'));
+    
+    handles = apply_smoothing(handles, col_idx, window_size);
+    
+    % Update the list boxes
+    h_ = findobj('Tag','edit1LB'); set(h_,'String',handles.column);
+    h_ = findobj('Tag','edit2LB'); set(h_,'String',handles.column);
+    h_ = findobj('Tag','edit3LB'); set(h_,'String',handles.column);
 end
-finestra=n;
-
-posy=get(ax_,'Ylim');
-posx=get(ax_,'Xlim');
-
-eval(['h_=findobj(''Tag'',''edit' num2str(n) ''');']); %n=numero asse
-s=str2double(get(h_,'String'));  %numero della colonna
-
-%if any(strcmp(handles.column,{[handles.column{s} 'o']}));
-%s=find(strcmp(handles.column,{[handles.column{s} 'o']}));
-%end
-
-%running mean
-eval(['pippo=(handles.' handles.column{s} ');']);
-if (handles.sm)/2==floor(handles.sm/2); handles.sm=handles.sm+1; end %check sul numero dispari
-l=(handles.sm-1)/2; %es:(101-1)/2=50;
-
-pm=pippo(l+1:length(pippo)-l);
-for i=l+1:length(pippo)-l;
-    pm(i-l)=sum(pippo(i-l:i+l));
-end
-pippo(l+1:length(pippo)-l)=pm/(handles.sm);
-
-%windowSize = handles.sm;
-%pm2=filter(ones(1,windowSize)/windowSize,1,pippo);
-%smooths data Y using a handles.sm -point moving average.
-%eval(['handles.' handles.column{s} '=smooth(handles.' handles.column{s} ',handles.sm);'])
-
-eval(['handles.' handles.column{s} 'o=handles.' handles.column{s} ';'])
-eval(['handles.' handles.column{s} '=pippo;'])
-if ~strcmp(handles.column,{[handles.column{s} 'o']});
-    handles.column(end+1)={[handles.column{s} 'o']};
-end
-
-
-%handles.g1=find(strcmp(handles.column,{[handles.column{s} 'smooth']}));
 
 h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column);
 h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column);
@@ -1013,20 +978,14 @@ function cut_dt_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of cut_dt as text
 %        str2double(get(hObject,'String')) returns contents of cut_dt as a double
-set(hObject,'Enable','on')
-
-
-handles.dt=str2double(get(hObject,'String'));
-%set(hObject,'String',handles.dt,'BackgroundColor',[0.75 0.75 0.75])
-ll=find(handles.Stamp(:,1)==handles.dt); %,1,'first');
-if length(ll) <= 100; h=msgbox('attention: number of residuals less than 100'); waitfor(h); return; end
-%nn=find(handles.Stamp(:,1)==handles.dt,1,'last');
-
-for n=1:length(handles.column)
-    eval(['handles.' handles.column{n} ' = handles.' handles.column{n} '(ll,1);'])
+dt_val = str2double(get(hObject,'String'));
+if isempty(dt_val)
+    disp('Invalid dt value for cutting.');
+    return;
 end
 
-set(hObject,'String','cut_dt')
+handles = cut_data_by_timestep(handles, dt_val);
+
 guidata(hObject, handles);
 plotta_ora(handles)
 end
@@ -2310,57 +2269,77 @@ function brutalfilt_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of brutalfilt as text
 %        str2double(get(hObject,'String')) returns contents of brutalfilt as a double
 
+filter_param = str2num(get(hObject,'String'));
+if isempty(filter_param); filter_param = 500; end
 
-set(hObject,'Enable','on','BackGroundColor','white')
-handles.brut=str2num(get(hObject,'String'));
-
-if isempty(handles.brut); handles.brut=500; end
+disp('Select an axis to apply brutal filter...');
 ginput(1)
 ax_=get(gcf,'CurrentAxes');
+[~, axis_idx] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
 
-for n=1:3
-    %     s=find(ax_==handles.figure1.Children);
-    s=find(ax_==handles.(['axes' num2str(n)]));
+if axis_idx > 0
+    h_ = findobj('Tag', ['edit' num2str(axis_idx)]);
+    col_idx = str2double(get(h_, 'String'));
     
-    if s==1; break; end
+    handles = apply_brutal_filter(handles, col_idx, filter_param);
+    
+    % Update the list boxes
+    h_ = findobj('Tag','edit1LB'); set(h_,'String',handles.column);
+    h_ = findobj('Tag','edit2LB'); set(h_,'String',handles.column);
+    h_ = findobj('Tag','edit3LB'); set(h_,'String',handles.column);
 end
-
-
-% finestra=n;
-
-% posy=get(ax_,'Ylim');
-% posx=get(ax_,'Xlim');
-
-h_=findobj('Tag',['edit' num2str(n)]); %n=numero asse
-s=str2double(get(h_,'String'));  %numero della colonna
-
-% brutal filter & store in handles
-
-handles.([handles.column{s} 'o'])=handles.(handles.column{s});
-handles.([handles.column{s}])=brutal_filter_fx(1024,0.9,handles.brut,handles.(handles.column{s}),handles.Stamp);
-
-% store in column vector
-if ~strcmp(handles.column,{[handles.column{s} 'o']})
-    handles.column(end+1)={[handles.column{s} 'o']};
-end
-
-h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column);
-h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column);
-h_=findobj('Tag','edit3LB'); set(h_,'String',handles.column);
 
 guidata(hObject, handles);
-
 plotta_ora(handles);
-
 end
 % --- Executes on button press in filtvel.
 function filtvel_Callback(hObject, eventdata, handles)
 % hObject    handle to filtvel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    
+% 1. User interaction to get the transition index
+transition_index = [];
+if isfield(handles, 'XIin')
+    response = questdlg('A transition index already exists. Change it?', 'Filter Velocity', 'Yes', 'No', 'No');
+    if strcmp(response, 'No')
+        transition_index = handles.XIin;
+    end
+end
+if and(isfield(handles,"Slip_Enc_1"),isfield(handles,"Slip_Enc_2"))
+    if isempty(transition_index)
 
-% Hint: get(hObject,'Value') returns toggle state of filtvel
-%[handles.velF, handles.slipF]=finfilt(handles.Time, handles.slip);
+        hf = figure;
+        plot(handles.Slip_Enc_1); hold on; plot(handles.Slip_Enc_2);
+        title('Zoom on transition point then press enter to select it');
+        zoom on;
+        waitfor(hf, 'CurrentCharacter', char(13)); % Wait for Enter key
+        [xi, ~] = ginput(1);
+        transition_index = round(xi);
+        handles.XIin = transition_index;
+        close(hf);
+
+    end
+
+    % 2. Call the external function
+    handles = filter_velocity(handles, transition_index);
+
+    % 3. Update UI
+    if ~any(strcmp(handles.column, 'velF'))
+        handles.column{end+1} = 'velF';
+        handles.column{end+1} = 'slipF';
+        h_ = findobj('Tag','edit1LB'); set(h_,'String',handles.column);
+        h_ = findobj('Tag','edit2LB'); set(h_,'String',handles.column);
+        h_ = findobj('Tag','edit3LB'); set(h_,'String',handles.column);
+    end
+else
+    disp("No Slip_Enc_1 Slip_Enc_2, perform calibration first")
+end
+
+    guidata(hObject, handles);
+    plotta_ora(handles);
+end
+%{
 esi=0;
 sin='n';
 if any(strcmp(fieldnames(handles),'XIin'));
@@ -2389,17 +2368,7 @@ vel=diff(slip)./diff(xt); vel(end+1)=vel(end);
 handles.velF=vel;
 handles.slipF=slip;
 plot(vel,'k');
-
-%handles.velF=filtravel_shiva(handles.vel,handles.Time, 25);
-%handles.slipF=filtravel_shiva(handles.slip,handles.Time, 25);
-
-if any(strcmp(handles.column,'velF'));
-else
-handles.column{end+1}='velF';
-handles.column{end+1}='slipF';
-end
-guidata(hObject, handles);
-end
+%}
 
 %% calculate gouge layer thickness
 % --- Executes on button press in refresh_thickness.
