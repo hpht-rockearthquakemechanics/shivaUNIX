@@ -1,0 +1,46 @@
+function save_mat_data_red (handles, Name)
+
+h_=findobj('Tag','fluid');
+statoF=get(h_,'Value');
+h_=findobj('Tag','GH');
+statoGH=get(h_,'Value');
+
+if statoF==1
+    handles.save={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};
+elseif statoGH==1
+    handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'dspring' 'LVDT_low' 'vel' 'slip'}; %'TempE' 'TempM'};
+else
+    handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'LVDT_low' 'vel' 'slip' 'TempE'};
+end
+
+
+for j=1:length(handles.save)
+    if j==length(handles.save)
+        M(j,1)={['''' handles.save{j} '''']};
+    else
+        M(j,1)={['''' handles.save{j} '''' ',']};
+    end
+end
+M1=cell2mat(M');
+
+%for j=1:length(handles.column)
+%    if j==length(handles.column)
+%        O(j,1)={['''v' num2str(j) '''']};
+%    else
+%        O(j,1)={['''v' num2str(j) '''' ',']};
+%    end
+
+%    O1=cell2mat(O');
+%end
+
+%file header
+name4=['header', Name];
+nome2=[Name, '.mat'];
+%nome3=['originali', nome];
+
+eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
+%eval(['save(nome3,''-struct'',''handles'',' O1 ');'])
+%save('parametri','-struct','handles','loadT','shearT','triggered','cutted'
+%,'dt','sm')
+
+end
