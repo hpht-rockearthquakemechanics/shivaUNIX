@@ -1114,63 +1114,9 @@ h_=findobj('Tag','edit3LB'); set(h_,'String',1);
 
 cd (PathName)
 
-data=load(FileName);
+handles=load_mat_data(handles,FileName);
 
-dataName=fieldnames(data);
-% if length(dataName); data=getfield(data,dataName{1}); end
-
-h_=findobj('Tag','dt_value');
-stato=get(h_,'Value');
-if isempty(stato)
-    handles.dt=0.04;
-else
-    handles.dt=stato;
-end
-
-%set(h_,'String',handles.dt);
-
-handles.filename=FileName;
-
-handles.sm=0;
-handles.triggered=0;
-handles.cutted=[0 0];
-handles.loadT=0;
-handles.shearT=0;
-ll=1;
-nn=length(data.Time);
-
-handles.column=fieldnames(data)
-
-for i=1:length(handles.column)
-    handles.(handles.column{i})=data.(handles.column{i}); %debuggato
-    %     eval(['handles.' handles.column{i} '=data.' handles.column{i} ';'])
-end
-
-h_=findobj('Tag','edit1LB'); set(h_,'String',handles.column);
-h_=findobj('Tag','edit2LB'); set(h_,'String',handles.column);
-h_=findobj('Tag','edit3LB'); set(h_,'String',handles.column);
-
-% Assess if time is milliseconds or not (this fixes a bug when calculating velocity)
-
-timess = handles.Stamp;
-if max(timess)>60 || min(timess)>0.7
-    disp('Time is in Milliseconds')
-    handles.tconv = 1;
-elseif max(timess)<60 || min(timess)<0.7
-    disp('Time is in seconds')
-    handles.tconv = 1000;
-else
-    disp('Unable to ascertain time units')
-end
-
-handles.load=1;
-handles.Done=1;
-new=handles;
 guidata(hObject, handles);
-guidata(hObject, new);
-
-handles.zoom=0;
-
 plotta_ora(handles);
 end
 
