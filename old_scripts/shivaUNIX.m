@@ -228,27 +228,24 @@ if any(I)
         eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
     end
     handles=rmfield(handles,'column');
-    
+
 end
 
 fname=fieldnames(handles);
 I=strfind(fname,'GEF');
 if any(cell2mat(I))
     for i=1:length(fname)
-        if ~isempty(strfind(fname{i},'GEF'));
+        if ~isempty(strfind(fname{i},'GEF'))
             eval(['handles=rmfield(handles,''', fname{i}, ''');'])
         end
     end
 end
-
 
 handles.load=0; % flag su load o open
 clear file1
 I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
 I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
 I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
-
-
 
 %definisce i grafici da plottare:
 %qui ci sono i default
@@ -261,110 +258,12 @@ ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
 ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
 
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-    'C:\Users\stear\Dropbox\Ricerca\SHIVA');
-
-
+    '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
 cd (PathName)
 
-%definisce i parametri da matrice
-%handles.column=importdata(FileName,'\t',1);
-
-fid=fopen(FileName,'r');
-for i=1:3
-    file1=fgets(fid);
-end
-fclose(fid);
-
-
-%file0=importdata(FileName,'\t',3);file1=char(file0(3,:));
-[I]=find(file1==char(44)); change=logical(0);
-if ~isempty(I); file1(I)=char(46); change=logical(1); end
-A=sscanf(file1,'%f');
-b=length(A); clear A
-fid=fopen(FileName,'r');
-
-for i=1:b
-    A=fscanf(fid,'%s',1);
-    %controlla che non interpreti uno spazio come nuova variabile
-    if any(strcmp(fieldnames(handles),'column')) && ...
-            strcmp(A,2); handles.column{i-1}={[char(handles.column(i-1)), '2']};
-    else handles.column(i)={A};
-    end
-    %controlla che non ce ne siano due uguali
-    S=sum(strcmp(handles.column(i), handles.column));
-    if S > 1; handles.column{i}=([char(handles.column(i)), '2']); end
-    
-end
-
-fgets(fid);    fgets(fid); i=0;
-if change
-    while 1
-        i=i+1;
-        tline = fgetl(fid);
-        if ~ischar(tline), break, end
-        [I]=find(tline==char(44));
-        if ~isempty(I); tline(I)=char(46); end
-        file1.data(i,:)=sscanf(tline,'%f');
-    end
-else
-    file1=importdata(FileName,'\t',3);
-end
-fclose(fid);
-
-h_=findobj('Tag','dt_value');
-
-handles.filename=FileName;
-
-handles.sm=0;
-handles.triggered=0;
-handles.cutted=[0 0];
-handles.loadT=0;
-handles.shearT=0;
-ll=1;
-nn=length(file1.data(:,1));
-
-%primo step:togliere tutto quello che ha un campionamento diverso da dt
-%handles.xlab=0:handles.dt:(length(file1.data)-1)*handles.dt;
-%memorizza anche gli originali
-%eval(['handles.' handles.column{1} ' = cumsum(file1.data(ll:nn,1)); '])
-%eval(['handles.v' num2str(1) ' = cumsum(file1.data(ll:nn,1)); '])
-handles.column{1}='Time';
-num=length(handles.column);
-
-for n=2:num
-    test=double(handles.column{n});
-    if any(test==32); handles.column{n}=char(test(test~=32)); end
-    eval(['handles.' handles.column{n} ' = file1.data(ll:nn,' num2str(n) ');'])
-end
-
-
-handles.column{num+1}='Stamp';
-eval(['handles.' handles.column{num+1} '= file1.data(ll:nn,1); '])
-
-num=length(handles.column);
-handles.column{num+1}='Rate';
-eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-
-num=length(handles.column);
-handles.column{num+1}='RateZero';
-eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-% --> ele
-
-hv=get(handles.XLab(1),'Value');
-handles.TimeZero=cumsum(handles.Stamp);
-handles.Time=zeros(size(handles.Stamp));
-handles.Time(1)=hv*handles.Stamp(1);
-handles.Time(2:end)=hv*handles.Stamp(1) +cumsum(handles.Stamp(2:end)); %plotto il numero di riga
-
-handles.Done=[];
-
-handles.tconv = 1000; %<--- Corrections for time conversion in velocity calculation!
+handles = open_ascii_data(handles, FileName);
 
 guidata(hObject, handles);
-handles.zoom=0;
-
 plotta_ora(handles);
 end
 
@@ -386,27 +285,24 @@ if any(I)
         eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
     end
     handles=rmfield(handles,'column');
-    
+
 end
 
 fname=fieldnames(handles);
 I=strfind(fname,'GEF');
 if any(cell2mat(I))
     for i=1:length(fname)
-        if ~isempty(strfind(fname{i},'GEF'));
+        if ~isempty(strfind(fname{i},'GEF'))
             eval(['handles=rmfield(handles,''', fname{i}, ''');'])
         end
     end
 end
-
 
 handles.load=0; % flag su load o open
 clear file1
 I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
 I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
 I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
-
-
 
 %definisce i grafici da plottare:
 %qui ci sono i default
@@ -419,132 +315,12 @@ ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
 ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
 
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-    '~/Documents/Roma/Raw lab data');
-
-
+    '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
 cd (PathName)
 
-%definisce i parametri da matrice
-%handles.column=importdata(FileName,'\t',1);
-
-fid=fopen(FileName,'r');
-for i=1:3
-    file1=fgets(fid);
-end
-fclose(fid);
-
-
-%file0=importdata(FileName,'\t',3);file1=char(file0(3,:));
-[I]=find(file1==char(44)); change=false;
-if ~isempty(I); file1(I)=char(46); change=true; end
-A=sscanf(file1,'%f');
-b=length(A); clear A
-fid=fopen(FileName,'r');
-
-for i=1:b
-    A=fscanf(fid,'%s',1);
-    %controlla che non interpreti uno spazio come nuova variabile
-    if any(strcmp(fieldnames(handles),'column')) && ...
-            strcmp(A,2); handles.column{i-1}={[char(handles.column(i-1)), '2']};
-    else
-        handles.column(i)={A};
-    end
-    %controlla che non ce ne siano due uguali
-    S=sum(strcmp(handles.column(i), handles.column));
-    if S > 1; handles.column{i}=([char(handles.column(i)), '2']); end
-    
-end
-
-fgets(fid);    fgets(fid); i=0;
-if change
-    while 1
-        i=i+1;
-        tline = fgetl(fid);
-        if ~ischar(tline); break; end
-        [I]=find(tline==char(44));
-        if ~isempty(I); tline(I)=char(46); end
-        file1.data(i,:)=sscanf(tline,'%f');
-    end
-else
-    file1=importdata(FileName,'\t',3);
-end
-fclose(fid);
-
-h_=findobj('Tag','dt_value');
-
-%[ndt,vdt]=grp2idx(file1.data(:,1));
-%if numel(vdt) > 1; handles.dt=str2double(vdt(2));
-%else
-%    handles.dt=str2double(vdt(1))
-%end
-
-
-%set(h_,'String',handles.dt);
-
-handles.filename=FileName;
-
-handles.sm=0;
-handles.triggered=0;
-handles.cutted=[0 0];
-handles.loadT=0;
-handles.shearT=0;
-ll=1;
-nn=length(file1.data(:,1));
-timess = file1.data(:,1);
-if max(timess)>60 || min(timess)>0.7
-    disp('Time is in Milliseconds')
-    tconv = 1;
-elseif max(timess)<60 || min(timess)<0.7
-    disp('Time is in seconds')
-    tconv = 1000;
-else
-    disp('Unable to ascertain time units')
-end
-%primo step:togliere tutto quello che ha un campionamento diverso da dt
-%handles.xlab=0:handles.dt:(length(file1.data)-1)*handles.dt;
-%memorizza anche gli originali
-%eval(['handles.' handles.column{1} ' = cumsum(file1.data(ll:nn,1)); '])
-%eval(['handles.v' num2str(1) ' = cumsum(file1.data(ll:nn,1)); '])
-
-
-handles.column{1}='Time';
-num=length(handles.column);
-
-for n=2:num
-    test=double(handles.column{n});
-    if any(test==32)
-        handles.column{n}=char(test(test~=32));
-    end
-    eval(strcat('handles.',handles.column{n}, '= file1.data(ll:nn,', num2str(n), ');'))
-end
-
-
-
-handles.column{num+1}='Stamp';
-eval(['handles.' handles.column{num+1} '= file1.data(ll:nn,1);'])
-
-num=length(handles.column);
-handles.column{num+1}='Rate';
-eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-num=length(handles.column);
-handles.column{num+1}='RateZero';
-eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-% --> ele
-hv=get(handles.XLab(1),'Value');
-handles.TimeZero=cumsum(handles.Stamp);
-handles.Time=zeros(size(handles.Stamp));
-handles.Time(1)=hv*handles.Stamp(1);
-handles.Time(2:end)=hv*handles.Stamp(1) +cumsum(handles.Stamp(2:end)); %plotto il numero di riga
-
-handles.Done=[];
-handles.Time=handles.Time*tconv;
-handles.tconv=tconv;
+handles = open_ascii_data(handles, FileName);
 
 guidata(hObject, handles);
-handles.zoom=0;
-
 plotta_ora(handles);
 end
 

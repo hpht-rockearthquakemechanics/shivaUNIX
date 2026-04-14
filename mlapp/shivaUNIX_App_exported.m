@@ -449,14 +449,11 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                 end
             end
 
-
             handles.load=0; % flag su load o open
             clear file1
             I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
             I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
             I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
-
-
 
             %definisce i grafici da plottare:
             %qui ci sono i default
@@ -472,131 +469,11 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
                 '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
             app.figure1.WindowStyle = 'alwaysontop';
-
-
             cd (PathName)
 
-            %definisce i parametri da matrice
-            %handles.column=importdata(FileName,'\t',1);
-
-            fid=fopen(FileName,'r');
-            for i=1:3
-                file1=fgets(fid);
-            end
-            fclose(fid);
-
-
-            %file0=importdata(FileName,'\t',3);file1=char(file0(3,:));
-            [I]=find(file1==char(44)); change=false;
-            if ~isempty(I); file1(I)=char(46); change=true; end
-            A=sscanf(file1,'%f');
-            b=length(A); clear A
-            fid=fopen(FileName,'r');
-
-            for i=1:b
-                A=fscanf(fid,'%s',1);
-                %controlla che non interpreti uno spazio come nuova variabile
-                if and(any(strcmp(fieldnames(handles),'column')), strcmp(A,2)) 
-                    handles.column{i-1}={[char(handles.column(i-1)), '2']};
-                else
-                    handles.column(i)={A};
-                end
-                %controlla che non ce ne siano due uguali
-                S=sum(strcmp(handles.column(i), handles.column));
-                if S > 1; handles.column{i}=([char(handles.column(i)), '2']); end
-
-            end
-
-            fgets(fid);    fgets(fid); i=0;
-            if change
-                while 1
-                    i=i+1;
-                    tline = fgetl(fid);
-                    if ~ischar(tline); break; end
-                    [I]=find(tline==char(44));
-                    if ~isempty(I); tline(I)=char(46); end
-                    file1.data(i,:)=sscanf(tline,'%f');
-                end
-            else
-                file1=importdata(FileName,'\t',3);
-            end
-            fclose(fid);
-
-            h_=findobj('Tag','dt_value');
-
-            %[ndt,vdt]=grp2idx(file1.data(:,1));
-            %if numel(vdt) > 1; handles.dt=str2double(vdt(2));
-            %else
-            %    handles.dt=str2double(vdt(1))
-            %end
-
-
-            %set(h_,'Value',handles.dt);
-
-            handles.filename=FileName;
-
-            handles.sm=0;
-            handles.triggered=0;
-            handles.cutted=[0 0];
-            handles.loadT=0;
-            handles.shearT=0;
-            ll=1;
-            nn=length(file1.data(:,1));
-            timess = file1.data(:,1);
-            if max(timess)>60 || min(timess)>0.7
-                disp('Time is in Milliseconds')
-                tconv = 1;
-            elseif max(timess)<60 || min(timess)<0.7
-                disp('Time is in seconds')
-                tconv = 1000;
-            else
-                disp('Unable to ascertain time units')
-            end
-            %primo step:togliere tutto quello che ha un campionamento diverso da dt
-            %handles.xlab=0:handles.dt:(length(file1.data)-1)*handles.dt;
-            %memorizza anche gli originali
-            %eval(['handles.' handles.column{1} ' = cumsum(file1.data(ll:nn,1)); '])
-            %eval(['handles.v' num2str(1) ' = cumsum(file1.data(ll:nn,1)); '])
-
-
-            handles.column{1}='Time';
-            num=length(handles.column);
-
-            for n=2:num
-                test=double(handles.column{n});
-                if any(test==32)
-                    handles.column{n}=char(test(test~=32));
-                end
-                eval(strcat('handles.',handles.column{n}, '= file1.data(ll:nn,', num2str(n), ');'))
-            end
-
-
-
-            handles.column{num+1}='Stamp';
-            eval(['handles.' handles.column{num+1} '= file1.data(ll:nn,1);'])
-
-            num=length(handles.column);
-            handles.column{num+1}='Rate';
-            eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-            num=length(handles.column);
-            handles.column{num+1}='RateZero';
-            eval(['handles.' handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
-
-            % --> ele
-            hv=get(handles.XLab(1),'Value');
-            handles.TimeZero=cumsum(handles.Stamp);
-            handles.Time=zeros(size(handles.Stamp));
-            handles.Time(1)=hv*handles.Stamp(1);
-            handles.Time(2:end)=hv*handles.Stamp(1) +cumsum(handles.Stamp(2:end)); %plotto il numero di riga
-
-            handles.Done=[];
-            handles.Time=handles.Time*tconv;
-            handles.tconv=tconv;
-            handles.zoom=0;
+            handles = open_ascii_data(handles, FileName);
 
             guidata(hObject, handles);
-
             plotta_ora(app, handles);
         end
 
@@ -705,8 +582,6 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Value changed function: brutalfilt
         function brutalfilt_Callback(app, event)
-            %% FIT
-
             % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
 
@@ -763,21 +638,37 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Value changed function: cutDt
         function cutDt_Callback(app, event)
+            %% --- Executes on button press in cut_dt
+
+            % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
+
+            % hObject    handle to cut_dt (see GCBO)
+            % eventdata  reserved - to be defined in a future version of MATLAB
+            % handles    structure with handles and user data (see GUIDATA)
             
             dt_val = str2double(app.cutDt.Value);
             if isempty(dt_val) || isnan(dt_val)
                 disp('Invalid dt value for cutting.');
                 return;
             end
+
             handles = cut_data_by_timestep(handles, dt_val);
+
             guidata(hObject, handles);
             plotta_ora(app, handles);
         end
 
         % Value changed function: decimate
         function decimate_Callback(app, event)
+            %% --- Executes on button press in decimate.
+
+            % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
+
+            % hObject    handle to decimate (see GCBO)
+            % eventdata  reserved - to be defined in a future version of MATLAB
+            % handles    structure with handles and user data (see GUIDATA)
             if ~isfield(handles,'column') || isempty(handles.column)
                 errordlg('No data loaded to decimate.', 'Data Error');
                 return;
@@ -1105,7 +996,6 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Button pushed function: refreshTemperature
         function refreshTemperature_Callback(app, event)
-            %% refresh temperature callback
             % --- Executes on button press in pushbutton18.
 
             % Create GUIDE-style callback args - Added by Migration Tool
@@ -1195,514 +1085,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             cal_params.popup_PF_index = find(strcmp(app.popupPF.Items, app.popupPF.Value));
             cal_params.popup_PC_index = find(strcmp(app.popupPC.Items, app.popupPC.Value));
             cal_params.is_incremental = app.incremental.Value;
-            
-            AIstate=zeros(1,18);
-            for L=1:18
-                if isprop(app,['popupAI',num2str(L)]) == 0
-                else
-                    h=app.(['popupAI',num2str(L)]);
-                    AIstate(L)=find(strcmp(h.Items, h.Value));
-                end
-            end
-            cal_params.AI_states = AIstate;
-            
-            % 2. Chiama la funzione di calibrazione esterna
-            handles = calibrate_data(handles, cal_params);
-            
-            % 3. Aggiorna la UI
-            % In App Designer, l'aggiornamento dei campi di testo/liste
-            % potrebbe richiedere un approccio diverso, ma per ora ci concentriamo
-            % sulla logica.
-            
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
 
-        % Button pushed function: unwrap
-        function unwrap_Callback(app, event)
-            %% generate unwrap
-            % --- Executes on button press in pushbutton22.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to pushbutton22 (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % Chiama la funzione esterna
-            handles = unwrap_encoder(handles);
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: refreshThickness
-        function refreshThickness_Callback(app, event)
-            %% calculate gouge layer thickness
-            % --- Executes on button press in refresh_thickness.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to refresh_thickness (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Raccogli i parametri dalla UI
-            ztl = str2double(app.zeroThicknessLVDT.Value);
-            zts = str2double(app.zeroThicknessLVDTShort.Value);
-
-            % 2. Chiama la funzione esterna
-            handles = recalculate_thickness(handles, ztl, zts);
-
-            % 3. Aggiorna la UI (se necessario)
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: runningMean
-        function runningMean_Callback(app, event)
-            %% --- Executes on button press in running.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to running (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Interazione con l'utente
-            disp('Select start and end points for running mean calculation...');
-            t_cut=trovadataX(app, handles.axes1);
-            [xi,~]=ginput(2);
-            mat(1,:)=abs(t_cut - xi(1));
-            mat(2,:)=abs(t_cut - xi(2));
-            range_indices(1)=find(mat(1,:)==min(mat(1,:)), 1);
-            range_indices(2)=find(mat(2,:)==min(mat(2,:)), 1);
-            
-            ax_=get(gcf,'CurrentAxes');
-            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
-            h_ = app.(['edit',num2str(n)]); %n=numero asse
-            s=str2double(get(h_,'Value'));                        %numero della colonna
-
-            % 2. Chiama la funzione esterna
-            handles = apply_running_mean(handles, s, range_indices);
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Menu selected function: saveRED
-        function saveRED_Callback(app, event)
-            %% SAVERED--------------------------------------------------------------------
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to saveRED (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            % hObject    handle to save (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            pat0=pwd;
-
-            app.figure1.WindowStyle='normal';
-            [nome,pat]=uiputfile( ...
-                {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
-                '*.*',                   'All Files (*.*)'}, ...
-                'Save as',[pat0 '/' handles.filename]);
-            app.figure1.WindowStyle='alwaysontop';
-            cd (pat)
-
-
-            h_=findobj('Tag','fluid');
-            statoF=get(h_,'Value');
-            h_=findobj('Tag','GH');
-            statoGH=get(h_,'Value');
-
-            if statoF==1
-                handles.save={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};
-            elseif statoGH==1
-                handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'dspring' 'LVDT_low' 'vel' 'slip'}; %'TempE' 'TempM'};
-            else
-                handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'LVDT_low' 'vel' 'slip' 'TempE'};
-            end
-
-
-            for j=1:length(handles.save)
-                if j==length(handles.save)
-                    M(j,1)={['''' handles.save{j} '''']};
-                else
-                    M(j,1)={['''' handles.save{j} '''' ',']};
-                end
-            end
-            M1=cell2mat(M');
-
-            %for j=1:length(handles.column)
-            %    if j==length(handles.column)
-            %        O(j,1)={['''v' num2str(j) '''']};
-            %    else
-            %        O(j,1)={['''v' num2str(j) '''' ',']};
-            %    end
-
-            %    O1=cell2mat(O');
-            %end
-
-            %file header
-            name4=['header', nome];
-            nome2=[nome, '.mat'];
-            %nome3=['originali', nome];
-
-            eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
-            %eval(['save(nome3,''-struct'',''handles'',' O1 ');'])
-            %save('parametri','-struct','handles','loadT','shearT','triggered','cutted'
-            %,'dt','sm')
-        end
-
-        % Menu selected function: save
-        function save_Callback(app, event)
-            %% SAVE--------------------------------------------------------------------
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to save (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            pat0=pwd;
-
-            app.figure1.WindowStyle='normal';
-            [nome,pat]=uiputfile( ...
-                {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
-                '*.*',                   'All Files (*.*)'}, ...
-                'Save as',[pat0 '/' handles.filename]);
-            app.figure1.WindowStyle='alwaysontop';
-            cd (pat)
-
-            handles.save=handles.column;
-
-
-            for j=1:length(handles.save)
-                if j==length(handles.save)
-                    M(j,1)={['''' handles.save{j} '''']};
-                else
-                    M(j,1)={['''' handles.save{j} '''' ',']};
-                end
-            end
-            M1=cell2mat(M');
-
-            %for j=1:length(handles.column)
-            %    if j==length(handles.column)
-            %        O(j,1)={['''v' num2str(j) '''']};
-            %    else
-            %        O(j,1)={['''v' num2str(j) '''' ',']};
-            %    end
-
-            %    O1=cell2mat(O');
-            %end
-
-            %file header
-            name4=['header', nome];
-
-            nome2=[nome, 'RED.mat'];
-
-            eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
-        end
-
-        % Value changed function: smooth
-        function smooth_Callback(app, event)
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to smooth (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-
-            % Hints: get(hObject,'Value') returns contents of smooth as text
-            %        str2double(get(hObject,'Value')) returns contents of smooth as a double            
-            window_size = str2double(app.smooth.Value);
-            if isempty(window_size) || isnan(window_size); window_size = 500; end
-
-            disp('Select an axis to apply smoothing...');
-            ginput(1)
-            ax_=get(gcf,'CurrentAxes');
-            [~, axis_idx] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
-
-            if axis_idx > 0
-                h_ = app.(['edit' num2str(axis_idx)]);
-                col_idx = str2double(get(h_, 'Value'));
-                
-                handles = apply_smoothing(handles, col_idx, window_size);
-            end
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: trigger
-        function trigger_Callback(app, event)
-            % --- Executes on button press in trigger.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to trigger (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Interazione con l'utente
-            t_cut=trovadataX(app, handles.axes1);
-            trigger_index = [];
-
-            if isfield(handles, 'shearT') && handles.shearT > 0
-                prev_trig = find(handles.RateZero == handles.shearT, 1);
-                k = menu(['Trigger is at ' num2str(handles.shearT) '. Is that ok?'], 'Yes', 'No, select new', 'Manual input');
-                if k == 1
-                    trigger_index = prev_trig;
-                elseif k == 2
-                    disp('Select a new trigger point on the plot...');
-                    [xi, ~] = ginput(1);
-                    trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
-                elseif k == 3
-                    xi = input('Enter a trigger value for the X-axis: ');
-                    trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
-                end
-            else
-                disp('Select a trigger point on the plot...');
-                [xi, ~] = ginput(1);
-                trigger_index = find(abs(t_cut - xi) == min(abs(t_cut - xi)), 1);
-            end
-
-            % 2. Chiama la funzione esterna
-            if ~isempty(trigger_index)
-                handles = apply_trigger(handles, trigger_index);
-                handles.column{end+1}='velF';
-                handles.column{end+1}='slipF';
-                app.XLab.Value = app.XLab.Items{2}; % Imposta l'asse X su 'Time'
-            end
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: offsetEncoder0
-        function offsetEncoder0_Callback(app, event)
-            % --- Executes on button press in off_enc_0.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to off_enc_0 (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-
-            I=handles.triggered;
-            handles.Encoder2(1:I)=0;
-            handles.Encoder(1:I)=0;
-            guidata(hObject, handles);
-        end
-
-        % Button pushed function: offset
-        function offset_Callback(app, event)
-            % --- Executes on button press in offset.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to offset (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            % hObject    handle to offset_1 (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Interazione con l'utente
-            app.figure1.WindowStyle = 'normal';
-            [sel, ~] = listdlg('PromptString','Select columns to offset:',...
-                'SelectionMode','multiple',...
-                'ListString',handles.column);
-            app.figure1.WindowStyle = 'alwaysontop';
-            if isempty(sel)
-                return; % L'utente ha annullato
-            end
-            
-            disp('Select a point on the plot to use as zero-offset...');
-            [xi,yi]=ginput(1);
-            offset_index = trovaasse(app, handles.axes1, xi);
-
-            % 2. Chiama la funzione esterna
-            handles = apply_offset(handles, sel, offset_index);
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: outlayers
-        function outlayers_Callback(app, event)
-            % --- Executes on button press in outlayers.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to outlayers (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Interazione con l'utente
-            disp('Click on outliers. Right-click to replace individual points, middle-click for a range. Press Enter to finish.');
-            t_cut=trovadataX(app, handles.axes1);
-
-            button = 1;
-            xi = [];
-            while button == 1
-                [x, ~, b] = ginput(1);
-                if isempty(b) || b > 1, break; end
-                button = b;
-                xi(end+1) = x;
-            end
-            final_button = b;
-
-            if isempty(xi), return; end
-
-            ax_ = get(gcf, 'CurrentAxes');
-            [~, n] = ismember(ax_, [handles.axes1, handles.axes2, handles.axes3]);
-            h_ = app.(['edit' num2str(n)]);
-            s = str2double(h_.Value);
-            
-            % Trova l'indice per ogni punto cliccato
-            ll = zeros(1, length(xi));
-            for k = 1:length(xi)
-                [~, ll(k)] = min(abs(t_cut - xi(k)));
-            end
-            
-            % 2. Chiama la funzione esterna
-            handles = remove_outliers(handles, s, ll, final_button);
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Menu selected function: print
-        function print_Callback(app, event)
-            % PRINT---------------------------------------------------------
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to file (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-
-            hf=figure;
-            hn_=copyobj(handles.axes1,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-            ah_=get(handles.axes1,'children'); nom=get(ah_,'DisplayName');
-            hnl_=get(hn_,'YLabel'); set(hnl_,'String',nom)
-
-            hn_=copyobj(handles.axes2,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-            ah_=get(handles.axes2,'children'); nom=get(ah_,'DisplayName');
-            hnl_=get(hn_,'YLabel'); set(hnl_,'String',nom)
-
-            hn_=copyobj(handles.axes3,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-            ah_=get(handles.axes3,'children'); nom=get(ah_,'DisplayName');
-            hnl_=get(hn_,'YLabel'); set(hnl_,'String',nom)
-        end
-
-        % Button pushed function: refreshTemperature
-        function refreshTemperature_Callback(app, event)
-            %% refresh temperature callback
-            % --- Executes on button press in pushbutton18.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            disp('Refresh temperature!')
-            
-            % 1. Raccogli i parametri dalla UI
-            AIstate = zeros(1,18);
-            for L=1:18
-                prop_name = ['popupAI', num2str(L)];
-                if isprop(app, prop_name)
-                    h = app.(prop_name);
-                    AIstate(L) = find(strcmp(h.Items, h.Value));
-                else
-                    AIstate(L) = 0;
-                end
-            end
-
-            % 2. Chiama la funzione esterna
-            handles = recalculate_temperature(handles, AIstate);
-
-            % 3. Aggiorna la UI (se necessario)
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: refreshTau
-        function refreshTau_Callback(app, event)
-            %% refresh_tau callback
-            % --- Executes on button press in pushbutton19.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to pushbutton19 (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Raccogli i parametri dalla UI
-            rint = str2double(app.Rint.Value)/2000;
-            rext = str2double(app.Rext.Value)/2000;
-            calibration_index = find(strcmp(app.calibration.Items, app.calibration.Value));
-            is_GH = app.GH.Value;
-            pf_index = find(strcmp(app.popupPF.Items, app.popupPF.Value));
-
-            % 2. Chiama la funzione esterna
-            handles = recalculate_stress(handles, rint, rext, calibration_index, is_GH, pf_index);
-
-            % 3. Aggiorna la UI (se necessario)
-
-            guidata(hObject, handles);
-            plotta_ora(app, handles);
-        end
-
-        % Button pushed function: calibrate
-        function calibrate_Callback(app, event)
-            %% calibrate callback
-            % --- Executes on button press in pushbutton20.
-
-            % Create GUIDE-style callback args - Added by Migration Tool
-            [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
-
-            % hObject    handle to pushbutton20 (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            % hObject    handle to calibration (see GCBO)
-            % eventdata  reserved - to be defined in a future version of MATLAB
-            % handles    structure with handles and user data (see GUIDATA)
-            
-            % 1. Raccogli i parametri dalla UI di App Designer
-            cal_params = struct();
-            cal_params.rint = str2double(app.Rint.Value)/2000;
-            cal_params.rext = str2double(app.Rext.Value)/2000;
-            cal_params.calibration_index = find(strcmp(app.calibration.Items, app.calibration.Value));
-            cal_params.node1_str = app.nodeEnc1.Value;
-            cal_params.node2_str = app.nodeEnc2.Value;
-            cal_params.is_GH = app.GH.Value;
-            cal_params.is_TC = app.TC.Value;
-            cal_params.is_vac = app.vac.Value;
-            cal_params.is_thickness = app.get_thickness.Value;
-            cal_params.ztl = str2double(app.zeroThicknessLVDT.Value);
-            cal_params.zts = str2double(app.zeroThicknessLVDTShort.Value);
-            cal_params.is_gefran = app.Gefran.Value;
-            cal_params.is_adjrate = app.AdjRate.Value;
-            cal_params.is_torque_ctrl = app.Torque.Value;
-            cal_params.popup_PF_index = find(strcmp(app.popupPF.Items, app.popupPF.Value));
-            cal_params.popup_PC_index = find(strcmp(app.popupPC.Items, app.popupPC.Value));
-            cal_params.is_incremental = app.incremental.Value;
-            
             AIstate=zeros(1,18);
             for L=1:18
                 if isprop(app,['popupAI',num2str(L)]) == 0
