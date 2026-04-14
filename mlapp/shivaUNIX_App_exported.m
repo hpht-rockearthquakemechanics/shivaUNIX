@@ -353,64 +353,9 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
             cd (PathName)
 
-            data=load(FileName);
-
-            dataName=fieldnames(data);
-            % if length(dataName); data=getfield(data,dataName{1}); end
-
-            h_=findobj('Tag','dt_value');
-            stato=get(h_,'Value');
-            if isempty(stato)
-                handles.dt=0.04;
-            else
-                handles.dt=stato;
-            end
-
-            %set(h_,'Value',handles.dt);
-
-            handles.filename=FileName;
-
-            handles.sm=0;
-            handles.triggered=0;
-            handles.cutted=[0 0];
-            handles.loadT=0;
-            handles.shearT=0;
-            ll=1;
-            nn=length(data.Time);
-
-            handles.column=fieldnames(data);
-
-            for i=1:length(handles.column)
-                handles.(handles.column{i})=data.(handles.column{i}); %debuggato
-                %     eval(['handles.' handles.column{i} '=data.' handles.column{i} ';'])
-            end
-
-            h_=findobj('Tag','edit1LB'); set(h_,'Value',handles.column);
-            h_=findobj('Tag','edit2LB'); set(h_,'Value',handles.column);
-            h_=findobj('Tag','edit3LB'); set(h_,'Value',handles.column);
-
-            % Assess if time is milliseconds or not (this fixes a bug when calculating velocity)
-
-            timess = handles.Stamp;
-            if max(timess)>60 || min(timess)>0.7
-                disp('Time is in Milliseconds')
-                handles.tconv = 1;
-            elseif max(timess)<60 || min(timess)<0.7
-                disp('Time is in seconds')
-                handles.tconv = 1000;
-            else
-                disp('Unable to ascertain time units')
-            end
-
-            handles.load=1;
-            handles.Done=1;
-            new=handles;
-            handles.zoom=0;
+            handles=load_mat_data(handles,FileName);
 
             guidata(hObject, handles);
-            guidata(hObject, new);
-
-
             plotta_ora(app, handles);
         end
 
@@ -1271,35 +1216,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                 'Save as',[pat0 '/' handles.filename]);
             app.figure1.WindowStyle='alwaysontop';
             cd (pat)
-
-            handles.save=handles.column;
-
-
-            for j=1:length(handles.save)
-                if j==length(handles.save)
-                    M(j,1)={['''' handles.save{j} '''']};
-                else
-                    M(j,1)={['''' handles.save{j} '''' ',']};
-                end
-            end
-            M1=cell2mat(M');
-
-            %for j=1:length(handles.column)
-            %    if j==length(handles.column)
-            %        O(j,1)={['''v' num2str(j) '''']};
-            %    else
-            %        O(j,1)={['''v' num2str(j) '''' ',']};
-            %    end
-
-            %    O1=cell2mat(O');
-            %end
-
-            %file header
-            name4=['header', nome];
-
-            nome2=[nome, 'RED.mat'];
-
-            eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
+            
+            save_mat_data(handles,nome)
         end
 
         % Value changed function: smooth
