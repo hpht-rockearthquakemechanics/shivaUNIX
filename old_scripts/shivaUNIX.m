@@ -859,19 +859,12 @@ function print_Callback(hObject, eventdata, handles)
 % hObject    handle to file (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-hf=figure;
-hn_=copyobj(handles.axes1,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-ah_=get(handles.axes1,'children'); nom=get(ah_,'DisplayName');
-hnl_=get(hn_,'YLabel'); set(hnl_,'string',nom)
-
-hn_=copyobj(handles.axes2,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-ah_=get(handles.axes2,'children'); nom=get(ah_,'DisplayName');
-hnl_=get(hn_,'YLabel'); set(hnl_,'string',nom)
-
-hn_=copyobj(handles.axes3,hf); h1=get(hn_,'Position'); h1(1)=h1(1)+0.1; set(hn_,'Position',h1);
-ah_=get(handles.axes3,'children'); nom=get(ah_,'DisplayName');
-hnl_=get(hn_,'YLabel'); set(hnl_,'string',nom)
+if isfield(handles, 'filename')
+    % Chiama la funzione esterna per creare la figura per la stampa
+    create_printable_figure(handles);
+else
+    errordlg('No data loaded to print.', 'Print Error');
+end
 end
 
 
