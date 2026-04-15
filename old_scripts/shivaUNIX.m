@@ -149,37 +149,9 @@ function OpenMenuItem_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%ripulisci precedente
-
-ah_=get(handles.axes1,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes2,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes3,'children'); set(ah_,'XData',[],'YData',[]);
-
-I=strcmp(fieldnames(handles),'column');
-
-if any(I)
-    for i=1:length(handles.column)
-        eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
-    end
-    handles=rmfield(handles,'column');
-
-end
-
-fname=fieldnames(handles);
-I=strfind(fname,'GEF');
-if any(cell2mat(I))
-    for i=1:length(fname)
-        if ~isempty(strfind(fname{i},'GEF'))
-            eval(['handles=rmfield(handles,''', fname{i}, ''');'])
-        end
-    end
-end
-
+% 1. Pulisci la sessione precedente chiamando la funzione esterna
+handles = reset_session(handles);
 handles.load=0; % flag su load o open
-clear file1
-I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
-I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
-I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
 
 %definisce i grafici da plottare:
 %qui ci sono i default
@@ -191,6 +163,7 @@ ax_=findobj('Tag','edit1'); set(ax_,'String',handles.g1);
 ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
 ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
 
+% 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
     '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
 cd (PathName)
@@ -206,37 +179,9 @@ function OpenMenuItem2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%ripulisci precedente
-
-ah_=get(handles.axes1,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes2,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes3,'children'); set(ah_,'XData',[],'YData',[]);
-
-I=strcmp(fieldnames(handles),'column');
-
-if any(I)
-    for i=1:length(handles.column)
-        eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
-    end
-    handles=rmfield(handles,'column');
-
-end
-
-fname=fieldnames(handles);
-I=strfind(fname,'GEF');
-if any(cell2mat(I))
-    for i=1:length(fname)
-        if ~isempty(strfind(fname{i},'GEF'))
-            eval(['handles=rmfield(handles,''', fname{i}, ''');'])
-        end
-    end
-end
-
+% 1. Pulisci la sessione precedente chiamando la funzione esterna
+handles = reset_session(handles);
 handles.load=0; % flag su load o open
-clear file1
-I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
-I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
-I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
 
 %definisce i grafici da plottare:
 %qui ci sono i default
@@ -248,6 +193,7 @@ ax_=findobj('Tag','edit1'); set(ax_,'String',handles.g1);
 ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
 ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
 
+% 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
     '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
 cd (PathName)
@@ -973,26 +919,8 @@ function Load_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-ah_=get(handles.axes1,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes2,'children'); set(ah_,'XData',[],'YData',[]);
-ah_=get(handles.axes3,'children'); set(ah_,'XData',[],'YData',[]);
-
-I=strcmp(fieldnames(handles),'column');
-
-if any(I)
-    for i=1:length(handles.column)
-        eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
-    end
-    handles=rmfield(handles,'column');
-    
-end
-clear file1
-I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
-I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
-I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
-
-%definisce i grafici da plottare:
-%qui ci sono i default
+% 1. Pulisci la sessione precedente chiamando la funzione esterna
+handles = reset_session(handles);
 handles.g1=2;
 handles.g2=3;
 handles.g3=5;
@@ -1005,7 +933,7 @@ h_=findobj('Tag','edit1LB'); set(h_,'String',1);
 h_=findobj('Tag','edit2LB'); set(h_,'String',1);
 h_=findobj('Tag','edit3LB'); set(h_,'String',1);
 
-
+% 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
     'C:\Users\Stefano\Dropbox\Ricerca\SHIVA');
 

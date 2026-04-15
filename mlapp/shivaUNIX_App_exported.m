@@ -284,27 +284,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % hObject    handle to Load (see GCBO)
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
-
-            ah_=get(handles.axes1,'children'); set(ah_,'XData',[],'YData',[]);
-            ah_=get(handles.axes2,'children'); set(ah_,'XData',[],'YData',[]);
-            ah_=get(handles.axes3,'children'); set(ah_,'XData',[],'YData',[]);
-
-            I=strcmp(fieldnames(handles),'column');
-
-            if any(I)
-                for i=1:length(handles.column)
-                    eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
-                end
-                handles=rmfield(handles,'column');
-
-            end
-            clear file1
-            I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
-            I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
-            I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
-
-            %definisce i grafici da plottare:
-            %qui ci sono i default
+            
+            handles = reset_session(handles);
             handles.g1=2;
             handles.g2=3;
             handles.g3=5;
@@ -312,10 +293,6 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             ax_=findobj('Tag','edit1'); set(ax_,'Value',string(handles.g1));
             ax_=findobj('Tag','edit2'); set(ax_,'Value',string(handles.g2));
             ax_=findobj('Tag','edit3'); set(ax_,'Value',string(handles.g3));
-
-            h_=findobj('Tag','edit1LB'); set(h_,'Value',1);
-            h_=findobj('Tag','edit2LB'); set(h_,'Value',1);
-            h_=findobj('Tag','edit3LB'); set(h_,'Value',1);
 
             app.figure1.WindowStyle = 'normal';
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
@@ -332,6 +309,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
         % Menu selected function: open
         function open_Callback(app, event)
+            %% OPEN --------------------------------------------------------------------
+            
             % Create GUIDE-style callback args - Added by Migration Tool
             [hObject, eventdata, handles] = convertToGUIDECallbackArguments(app, event); %#ok<ASGLU>
 
@@ -339,37 +318,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % eventdata  reserved - to be defined in a future version of MATLAB
             % handles    structure with handles and user data (see GUIDATA)
 
-            %ripulisci precedente
-
-            ah_=get(handles.axes1,'children'); set(ah_,'XData',[],'YData',[]);
-            ah_=get(handles.axes2,'children'); set(ah_,'XData',[],'YData',[]);
-            ah_=get(handles.axes3,'children'); set(ah_,'XData',[],'YData',[]);
-
-            I=strcmp(fieldnames(handles),'column');
-
-            if any(I)
-                for i=1:length(handles.column)
-                    eval(['handles=rmfield(handles,''', handles.column{i}, ''');'])
-                end
-                handles=rmfield(handles,'column');
-
-            end
-
-            fname=fieldnames(handles);
-            I=strfind(fname,'GEF');
-            if any(cell2mat(I))
-                for i=1:length(fname)
-                    if ~isempty(strfind(fname{i},'GEF'))
-                        eval(['handles=rmfield(handles,''', fname{i}, ''');'])
-                    end
-                end
-            end
-
+            handles = reset_session(handles);
             handles.load=0; % flag su load o open
-            clear file1
-            I=strcmp(fieldnames(handles),'new'); if any(I); handles=rmfield(handles,'new'); end
-            I=strcmp(fieldnames(handles),'X'); if any(I); handles=rmfield(handles,'X'); end
-            I=strcmp(fieldnames(handles),'TimeZero'); if any(I); handles=rmfield(handles,'TimeZero'); end
 
             %definisce i grafici da plottare:
             %qui ci sono i default
