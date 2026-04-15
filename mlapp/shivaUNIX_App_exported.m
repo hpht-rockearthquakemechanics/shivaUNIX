@@ -70,12 +70,12 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
         zoom                         matlab.ui.control.Button
         edit1                        matlab.ui.control.EditField
         text13                       matlab.ui.control.Label
-        axes1                        matlab.ui.control.UIAxes
-        axes2                        matlab.ui.control.UIAxes
-        axes3                        matlab.ui.control.UIAxes
-        axes4                        matlab.ui.control.UIAxes
-        axes5                        matlab.ui.control.UIAxes
         axes6                        matlab.ui.control.UIAxes
+        axes5                        matlab.ui.control.UIAxes
+        axes4                        matlab.ui.control.UIAxes
+        axes3                        matlab.ui.control.UIAxes
+        axes2                        matlab.ui.control.UIAxes
+        axes1                        matlab.ui.control.UIAxes
     end
 
 
@@ -235,72 +235,43 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % handles    structure with handles and user data (see GUIDATA)
 
             % Hint: get(hObject,'Value') returns toggle state of Gefran
-            stato=get(hObject,'Value');
+            if get(hObject,'Value') == 1
+                app.figure1.WindowStyle = 'normal';
+                ButtonName = questdlg('GEFRAN operations require preliminary steps (e.g., cut_dt, decimate). Do you want to load GEFRAN data now?', ...
+                    'Load GEFRAN Data', 'Yes', 'No', 'No');
+                app.figure1.WindowStyle = 'alwaysontop';
 
-            if stato==1
-                ButtonName = questdlg('GEFRAN preliminary operations: (1) identify the main sampling rate with cut_dt (2) decimate the data to 1s', ...
-                    'Do you want to proceed now?', 'No', 'Yes','No');
+                if strcmp(ButtonName, 'Yes')
+                    % --- Logica di selezione file ---
+                    Path2 = '/media/disk1/shivadir/Shiva Experiments';
+                    name = handles.filename(1:4);
+                    gefran_file_path = '';
 
-                switch ButtonName
-                    case 'No'
-                        disp('no');
-                        set(hObject,'Value',0);
-                    case 'Yes'
+                    list = dir([Path2 '/' name '*']);
+                    if ~isempty(list)
+                        Path2 = [Path2 '/' list(1).name '/'];
+                        name2 = dir([Path2 '*.txt']);
+                        gefran_file_path = fullfile(Path2, name2(1).name);
+                    else
+                        app.figure1.WindowStyle = 'normal'; drawnow;
+                        [FileGEF, Path] = uigetfile('/media/disk1/shivadir/*.txt', 'Select the GEFRAN file to load');
+                        app.figure1.WindowStyle = 'alwaysontop';
 
-                        I=find(~strcmp(handles.column,'SpeedGEF')); handles.column=handles.column(I);
-                        I=find(~strcmp(handles.column,'timeGEF')); handles.column=handles.column(I);
-                        I=find(~strcmp(handles.column,'TorqueGEF')); handles.column=handles.column(I);
-
-                        Path2='/media/disk1/shivadir/Shiva Experiments';
-                        name=handles.filename(1:4);
-
-                        list=dir([Path2 '/' name '*']);
-                        if ~isempty(list); Path2=[Path2 '/' list.name '/'];
-                            name2=dir([Path2 '*.txt']);
-                            FileGEF=name2.name;
-                        else
-                            [FileGEF,Path2] = uigetfile( '/media/disk1/shivadir/*.txt', ...
-                                'Multiple File Detected: Select the file GEFRAN to load');
-                            name2='';
+                        if ~isequal(FileGEF, 0)
+                            gefran_file_path = fullfile(Path, FileGEF);
                         end
+                    end
 
+                    if ~isempty(gefran_file_path)
+                        handles = load_gefran_data(handles, gefran_file_path);
+                    end
 
-                        gefran1=1; k=0 ;
-                        while ~isstruct(gefran1)
-                            k=k+1;
-                            gefran1=importdata([Path2 '/' FileGEF],'\t',k);
-                        end
-
-                        I=find(strncmp(gefran1.textdata,'Time	Speed',6)); if ~isempty(I); new.timeGEF=gefran1.data(:,1); new.VGEF(:,1)=gefran1.data(:,2); end
-                        I=find(strncmp(gefran1.textdata,'Act Torque',6)); if ~isempty(I); new.TqGEF(:,1)=gefran1.data(:,I(1)-1); end
-                        I=find(strncmp(gefran1.textdata,'Speed',5)); if ~isempty(I); new.VGEF(:,1)=gefran1.data(:,I(1)-1); end
-                        I=find(strncmp(gefran1.textdata,'time',4)); if ~isempty(I); new.timeGEF(:,1)=gefran1.data(:,I(1)-1); end
-
-                        dt=diff(new.timeGEF); dt(end+1)=dt(1);
-
-                        %for j=1:length(handles.column);
-                        %    eval(['new.' handles.column{j} '= downsample(handles.' handles.column{j} ',' num2str(25) ');'])
-                        %end
-                        %dati di calibrazione
-
-                        nomi=[];
-                        [a,b]=size(handles.column); [aa,bb]=size(fieldnames(new));
-                        inp1=handles.column;
-                        if aa==1 & aa==b | bb==1 & a==1; inp1=handles.column'; end
-                        nomi=[inp1 ; fieldnames(new)];
-
-                        handles.column=[];
-                        handles.column=nomi';
-                        nomi2=fieldnames(new);
-
-                        for k=1:length(nomi2)
-                            eval(['handles.' char(nomi2(k)) '=new.' char(nomi2(k)) ';'])
-                        end
-
-                        guidata(hObject, handles);
-
+                    guidata(hObject, handles);
+                else
+                    disp('GEFRAN loading cancelled by user.');
+                    app.Gefran.Value = 0; % Resetta il checkbox
                 end
-            end % switch
+            end
         end
 
         % Menu selected function: load
@@ -1314,55 +1285,31 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.GridLayout.RowSpacing = 1;
             app.GridLayout.Padding = [5 1 5 1];
 
-            % Create axes6
-            app.axes6 = uiaxes(app.GridLayout);
-            app.axes6.FontSize = 1;
-            app.axes6.NextPlot = 'replace';
-            app.axes6.Layout.Row = [2 4];
-            app.axes6.Layout.Column = 11;
-            app.axes6.Tag = 'axes6';
-
-            % Create axes5
-            app.axes5 = uiaxes(app.GridLayout);
-            app.axes5.FontSize = 12;
-            app.axes5.NextPlot = 'replace';
-            app.axes5.Layout.Row = [24 28];
-            app.axes5.Layout.Column = [6 11];
-            app.axes5.Tag = 'axes5';
-
-            % Create axes4
-            app.axes4 = uiaxes(app.GridLayout);
-            app.axes4.FontSize = 12;
-            app.axes4.NextPlot = 'replace';
-            app.axes4.Layout.Row = [18 22];
-            app.axes4.Layout.Column = [6 11];
-            app.axes4.Tag = 'axes4';
-
-            % Create axes3
-            app.axes3 = uiaxes(app.GridLayout);
-            app.axes3.CameraPosition = [0.5 0.5 9.16025403784439];
-            app.axes3.CameraTarget = [0.5 0.5 0.5];
-            app.axes3.CameraUpVector = [0 1 0];
-            app.axes3.CameraViewAngle = 6.60861036031192;
-            app.axes3.DataAspectRatio = [1 1 1];
-            app.axes3.PlotBoxAspectRatio = [1 1 1];
-            app.axes3.XLim = [0 1];
-            app.axes3.YLim = [0 1];
-            app.axes3.ZLim = [0 1];
-            app.axes3.CLim = [0 1];
-            app.axes3.ALim = [0 1];
-            app.axes3.XTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes3.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes3.YTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes3.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes3.ZTick = [0 0.5 1];
-            app.axes3.ZTickLabel = '';
-            app.axes3.TickDir = 'in';
-            app.axes3.FontSize = 12;
-            app.axes3.NextPlot = 'replace';
-            app.axes3.Layout.Row = [21 28];
-            app.axes3.Layout.Column = [1 4];
-            app.axes3.Tag = 'axes3';
+            % Create axes1
+            app.axes1 = uiaxes(app.GridLayout);
+            app.axes1.CameraPosition = [0.5 0.5 9.16025403784439];
+            app.axes1.CameraTarget = [0.5 0.5 0.5];
+            app.axes1.CameraUpVector = [0 1 0];
+            app.axes1.CameraViewAngle = 6.60861036031192;
+            app.axes1.DataAspectRatio = [1 1 1];
+            app.axes1.PlotBoxAspectRatio = [1 1 1];
+            app.axes1.XLim = [0 1];
+            app.axes1.YLim = [0 1];
+            app.axes1.ZLim = [0 1];
+            app.axes1.CLim = [0 1];
+            app.axes1.ALim = [0 1];
+            app.axes1.XTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes1.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes1.YTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes1.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes1.ZTick = [0 0.5 1];
+            app.axes1.ZTickLabel = '';
+            app.axes1.TickDir = 'in';
+            app.axes1.FontSize = 12;
+            app.axes1.NextPlot = 'replace';
+            app.axes1.Layout.Row = [2 9];
+            app.axes1.Layout.Column = [1 4];
+            app.axes1.Tag = 'axes1';
 
             % Create axes2
             app.axes2 = uiaxes(app.GridLayout);
@@ -1390,31 +1337,55 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.axes2.Layout.Column = [1 4];
             app.axes2.Tag = 'axes2';
 
-            % Create axes1
-            app.axes1 = uiaxes(app.GridLayout);
-            app.axes1.CameraPosition = [0.5 0.5 9.16025403784439];
-            app.axes1.CameraTarget = [0.5 0.5 0.5];
-            app.axes1.CameraUpVector = [0 1 0];
-            app.axes1.CameraViewAngle = 6.60861036031192;
-            app.axes1.DataAspectRatio = [1 1 1];
-            app.axes1.PlotBoxAspectRatio = [1 1 1];
-            app.axes1.XLim = [0 1];
-            app.axes1.YLim = [0 1];
-            app.axes1.ZLim = [0 1];
-            app.axes1.CLim = [0 1];
-            app.axes1.ALim = [0 1];
-            app.axes1.XTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes1.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes1.YTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes1.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes1.ZTick = [0 0.5 1];
-            app.axes1.ZTickLabel = '';
-            app.axes1.TickDir = 'in';
-            app.axes1.FontSize = 12;
-            app.axes1.NextPlot = 'replace';
-            app.axes1.Layout.Row = [2 9];
-            app.axes1.Layout.Column = [1 4];
-            app.axes1.Tag = 'axes1';
+            % Create axes3
+            app.axes3 = uiaxes(app.GridLayout);
+            app.axes3.CameraPosition = [0.5 0.5 9.16025403784439];
+            app.axes3.CameraTarget = [0.5 0.5 0.5];
+            app.axes3.CameraUpVector = [0 1 0];
+            app.axes3.CameraViewAngle = 6.60861036031192;
+            app.axes3.DataAspectRatio = [1 1 1];
+            app.axes3.PlotBoxAspectRatio = [1 1 1];
+            app.axes3.XLim = [0 1];
+            app.axes3.YLim = [0 1];
+            app.axes3.ZLim = [0 1];
+            app.axes3.CLim = [0 1];
+            app.axes3.ALim = [0 1];
+            app.axes3.XTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes3.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes3.YTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes3.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes3.ZTick = [0 0.5 1];
+            app.axes3.ZTickLabel = '';
+            app.axes3.TickDir = 'in';
+            app.axes3.FontSize = 12;
+            app.axes3.NextPlot = 'replace';
+            app.axes3.Layout.Row = [21 28];
+            app.axes3.Layout.Column = [1 4];
+            app.axes3.Tag = 'axes3';
+
+            % Create axes4
+            app.axes4 = uiaxes(app.GridLayout);
+            app.axes4.FontSize = 12;
+            app.axes4.NextPlot = 'replace';
+            app.axes4.Layout.Row = [18 22];
+            app.axes4.Layout.Column = [6 11];
+            app.axes4.Tag = 'axes4';
+
+            % Create axes5
+            app.axes5 = uiaxes(app.GridLayout);
+            app.axes5.FontSize = 12;
+            app.axes5.NextPlot = 'replace';
+            app.axes5.Layout.Row = [24 28];
+            app.axes5.Layout.Column = [6 11];
+            app.axes5.Tag = 'axes5';
+
+            % Create axes6
+            app.axes6 = uiaxes(app.GridLayout);
+            app.axes6.FontSize = 1;
+            app.axes6.NextPlot = 'replace';
+            app.axes6.Layout.Row = [2 4];
+            app.axes6.Layout.Column = 11;
+            app.axes6.Tag = 'axes6';
 
             % Create text13
             app.text13 = uilabel(app.GridLayout);

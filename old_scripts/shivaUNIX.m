@@ -780,72 +780,42 @@ function Gefran_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of Gefran
-stato=get(hObject,'Value');
-
-if stato==1
-    ButtonName = questdlg('GEFRAN preliminary operations: (1) identify the main sampling rate with cut_dt (2) decimate the data to 1s', ...
-        'Do you want to proceed now?', 'No', 'Yes','No');
+if get(hObject,'Value') == 1
+    ButtonName = questdlg('GEFRAN operations require preliminary steps (e.g., cut_dt, decimate). Do you want to load GEFRAN data now?', ...
+        'Load GEFRAN Data', 'Yes', 'No', 'No');
     
-    switch ButtonName,
-        case 'No',
-            disp('no');
-            set(hObject,'Value',0);
-        case 'Yes',
-            
-            I=find(~strcmp(handles.column,'SpeedGEF')); handles.column=handles.column(I);
-            I=find(~strcmp(handles.column,'timeGEF')); handles.column=handles.column(I);
-            I=find(~strcmp(handles.column,'TorqueGEF')); handles.column=handles.column(I);
-            
-            Path2='/media/disk1/shivadir/Shiva Experiments';
-            name=handles.filename(1:4);
-            
-            list=dir([Path2 '/' name '*']);
-            if ~isempty(list); Path2=[Path2 '/' list.name '/'];
-                name2=dir([Path2 '*.txt']);
-                FileGEF=name2.name;
-            else
-                [FileGEF,Path2] = uigetfile( '/media/disk1/shivadir/*.txt', ...
-                    'Multiple File Detected: Select the file GEFRAN to load');
-                name2='';
+    if strcmp(ButtonName, 'Yes')
+        % --- Logica di selezione file ---
+        Path2 = '/media/disk1/shivadir/Shiva Experiments';
+        name = handles.filename(1:4);
+        gefran_file_path = '';
+
+        list = dir([Path2 '/' name '*']);
+        if ~isempty(list)
+            Path2 = [Path2 '/' list(1).name '/'];
+            name2 = dir([Path2 '*.txt']);
+            gefran_file_path = fullfile(Path2, name2(1).name);
+        else
+            [FileGEF, Path] = uigetfile('/media/disk1/shivadir/*.txt', 'Select the GEFRAN file to load');
+            if ~isequal(FileGEF, 0)
+                gefran_file_path = fullfile(Path, FileGEF);
             end
-            
-            
-            gefran1=1; k=0 ;
-            while ~isstruct(gefran1)
-                k=k+1;
-                gefran1=importdata([Path2 '/' FileGEF],'\t',k);
-            end
-            
-            I=find(strncmp(gefran1.textdata,'Time	Speed',6)); if ~isempty(I); new.timeGEF=gefran1.data(:,1); new.VGEF(:,1)=gefran1.data(:,2); end
-            I=find(strncmp(gefran1.textdata,'Act Torque',6)); if ~isempty(I); new.TqGEF(:,1)=gefran1.data(:,I(1)-1); end
-            I=find(strncmp(gefran1.textdata,'Speed',5)); if ~isempty(I); new.VGEF(:,1)=gefran1.data(:,I(1)-1); end
-            I=find(strncmp(gefran1.textdata,'time',4)); if ~isempty(I); new.timeGEF(:,1)=gefran1.data(:,I(1)-1); end
-            
-            dt=diff(new.timeGEF); dt(end+1)=dt(1);
-            
-            %for j=1:length(handles.column);
-            %    eval(['new.' handles.column{j} '= downsample(handles.' handles.column{j} ',' num2str(25) ');'])
-            %end
-            %dati di calibrazione
-            
-            nomi=[];
-            [a,b]=size(handles.column); [aa,bb]=size(fieldnames(new));
-            inp1=handles.column;
-            if aa==1 & aa==b | bb==1 & a==1; inp1=handles.column'; end
-            nomi=[inp1 ; fieldnames(new)];
-            
-            handles.column=[];
-            handles.column=nomi';
-            nomi2=fieldnames(new);
-            
-            for k=1:length(nomi2)
-                eval(['handles.' char(nomi2(k)) '=new.' char(nomi2(k)) ';'])
-            end
-            
-            guidata(hObject, handles);
-            
+        end
+
+        if ~isempty(gefran_file_path)
+            handles = load_gefran_data(handles, gefran_file_path);
+            % Aggiorna le liste nella UI per mostrare le nuove colonne
+            set(findobj('Tag','edit1LB'),'String',handles.column);
+            set(findobj('Tag','edit2LB'),'String',handles.column);
+            set(findobj('Tag','edit3LB'),'String',handles.column);
+        end
+        
+        guidata(hObject, handles);
+    else
+        disp('GEFRAN loading cancelled by user.');
+        set(hObject, 'Value', 0); % Resetta il checkbox
     end
-end % switch
+end
 end
 
 %%%%%%%%%%% fine GEF
