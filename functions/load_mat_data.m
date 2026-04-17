@@ -7,16 +7,6 @@ data=load(FileName);
 dataName=fieldnames(data);
 % if length(dataName); data=getfield(data,dataName{1}); end
 
-h_=findobj('Tag','dt_value');
-stato=get(h_,'Value');
-if isempty(stato)
-    new_handles.dt=0.04;
-else
-    new_handles.dt=stato;
-end
-
-%set(h_,'Value',handles.dt);
-
 new_handles.filename=FileName;
 
 new_handles.sm=0;
@@ -33,10 +23,6 @@ for i=1:length(new_handles.column)
     new_handles.(new_handles.column{i})=data.(new_handles.column{i}); %debuggato
     %     eval(['handles.' handles.column{i} '=data.' handles.column{i} ';'])
 end
-
-h_=findobj('Tag','edit1LB'); set(h_,'Value',new_handles.column);
-h_=findobj('Tag','edit2LB'); set(h_,'Value',new_handles.column);
-h_=findobj('Tag','edit3LB'); set(h_,'Value',new_handles.column);
 
 % Assess if time is milliseconds or not (this fixes a bug when calculating velocity)
 

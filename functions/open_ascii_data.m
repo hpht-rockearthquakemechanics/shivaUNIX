@@ -49,17 +49,6 @@ else
 end
 fclose(fid);
 
-h_=findobj('Tag','dt_value');
-
-%[ndt,vdt]=grp2idx(file1.data(:,1));
-%if numel(vdt) > 1; new_handles.dt=str2double(vdt(2));
-%else
-%    new_handles.dt=str2double(vdt(1))
-%end
-
-
-%set(h_,'Value',new_handles.dt);
-
 new_handles.filename=FileName;
 
 new_handles.sm=0;
