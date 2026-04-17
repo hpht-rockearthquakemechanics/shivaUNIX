@@ -228,13 +228,18 @@ switch popupPF
             new.EffPressure=new.Normal-new.Pf;
         end
     case 4 % IscoPump
-        disp(' -> Calculating Pore Fluid Pressure (IscoPump)...');
-        gigione=input('What is the exact name of Isco Pump vector? ','s');
-        b=strfind(new_handles.column,gigione); j=0; n=[];
-        for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-        for j=1:length(n)
-            new.Pf=new_handles.(new_handles.column{n(j)})*cal.iscoP(1) + cal.iscoP(2);
-            new.EffPressure=new.Normal-new.Pf;
+        % Usa il nome del vettore specifico per la pressione dei pori
+        if isfield(cal_params, 'isco_pump_pf_vector_name') && ~isempty(cal_params.isco_pump_pf_vector_name)
+            disp([' -> Calculating Pore Fluid Pressure (IscoPump) using vector: ', cal_params.isco_pump_pf_vector_name]);
+            b=strfind(new_handles.column, cal_params.isco_pump_pf_vector_name); j=0; n=[];
+            for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+            if ~isempty(n)
+                % Assicurati di usare il primo match se ce ne sono più
+                new.Pf=new_handles.(new_handles.column{n(1)})*cal.iscoP(1) + cal.iscoP(2);
+                new.EffPressure=new.Normal-new.Pf;
+            end
+        else
+            warning('IscoPump selected for Pore Fluid, but no vector name was provided. Skipping calculation.');
         end
 end
 
@@ -260,12 +265,18 @@ switch popupPC
             new.Pc=new_handles.(new_handles.column{n(j)})*3.15911 - 2.557;
         end
     case 4 % IscoPump
-        disp(' -> Calculating Confining Pressure (IscoPump)...');
-        gigione=input('What is the exact name of Isco Pump vector? ','s');
-        b=strfind(new_handles.column,gigione); j=0; n=[];
-        for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
-        for j=1:length(n)
-            new.Pc=new_handles.(new_handles.column{n(j)})*cal.iscoP(1) + cal.iscoP(2);
+        % Usa il nome del vettore specifico per la pressione di confinamento
+        if isfield(cal_params, 'isco_pump_pc_vector_name') && ~isempty(cal_params.isco_pump_pc_vector_name)
+            disp([' -> Calculating Confining Pressure (IscoPump) using vector: ', cal_params.isco_pump_pc_vector_name]);
+            b=strfind(new_handles.column, cal_params.isco_pump_pc_vector_name); j=0; n=[];
+            for i=1:length(b); if ~isempty(b{i}); j=j+1; n(j)=i; end; end
+            if ~isempty(n)
+                % Assicurati di usare il primo match se ce ne sono più
+                new.Pc=new_handles.(new_handles.column{n(1)})*cal.iscoP(1) + cal.iscoP(2);
+                % new.EffPressure non è calcolato qui per Pc, solo per Pf
+            end
+        else
+            warning('IscoPump selected for Confining Pressure, but no vector name was provided. Skipping calculation.');
         end
 end
 

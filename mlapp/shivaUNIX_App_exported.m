@@ -236,7 +236,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
             % Hint: get(hObject,'Value') returns toggle state of Gefran
             if get(hObject,'Value') == 1
-                app.figure1.WindowStyle = 'normal';
+                app.figure1.WindowStyle = 'normal'; drawnow;
                 ButtonName = questdlg('GEFRAN operations require preliminary steps (e.g., cut_dt, decimate). Do you want to load GEFRAN data now?', ...
                     'Load GEFRAN Data', 'Yes', 'No', 'No');
                 app.figure1.WindowStyle = 'alwaysontop';
@@ -296,7 +296,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             ax_=findobj('Tag','edit3'); set(ax_,'Value',string(handles.g3));
 
             cfg = get_config();
-            app.figure1.WindowStyle = 'normal';
+            app.figure1.WindowStyle = 'normal'; drawnow;
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
                 cfg.mat_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
@@ -334,7 +334,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             ax_=app.edit3; set(ax_,'Value',string(handles.g3));
             
             cfg=get_config();
-            app.figure1.WindowStyle = 'normal';
+            app.figure1.WindowStyle = 'normal'; drawnow;
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
                 cfg.ascii_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
@@ -518,7 +518,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
             if handles.g1 ~= handles.g1
 
-                app.figure1.WindowStyle = 'normal';
+                app.figure1.WindowStyle = 'normal'; drawnow;
                 [s,v] = listdlg('PromptString','Select a file:',...
                     'SelectionMode','single',...
                     'ListString',handles.column);
@@ -553,7 +553,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
             if handles.g2 ~= handles.g2
 
-                app.figure1.WindowStyle = 'normal';
+                app.figure1.WindowStyle = 'normal'; drawnow;
                 [s,v] = listdlg('PromptString','Select a file:',...
                     'SelectionMode','single',...
                     'ListString',handles.column);
@@ -587,7 +587,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
 
             if handles.g3 ~= handles.g3
 
-                app.figure1.WindowStyle = 'normal';
+                app.figure1.WindowStyle = 'normal'; drawnow;
                 [s,v] = listdlg('PromptString','Select a file:',...
                     'SelectionMode','single',...
                     'ListString',handles.column);
@@ -722,7 +722,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             % handles    structure with handles and user data (see GUIDATA)
             
             % 1. Interazione con l'utente
-            app.figure1.WindowStyle = 'normal';
+            app.figure1.WindowStyle = 'normal'; drawnow;
             [sel, ~] = listdlg('PromptString','Select columns to offset:',...
                 'SelectionMode','multiple',...
                 'ListString',handles.column);
@@ -902,6 +902,32 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             end
             cal_params.AI_states = AIstate;
             
+            % 2. Chiama la funzione di calibrazione esterna
+            % Chiede all'utente i nomi dei vettori Isco se necessario (separatamente per PF e PC)
+            if cal_params.popup_PF_index == 4 % IscoPump per Pressione dei Pori
+                app.figure1.WindowStyle = 'normal'; drawnow;
+                isco_pump_pf_vector_name = inputdlg('Enter the exact name of the Isco Pump vector for Pore Fluid:', 'Isco Pump PF Vector', [1 50]);
+                pause(0.5)
+                app.figure1.WindowStyle = 'alwaysontop';
+                if ~isempty(isco_pump_pf_vector_name)
+                    cal_params.isco_pump_pf_vector_name = isco_pump_pf_vector_name{1};
+                else
+                    cal_params.isco_pump_pf_vector_name = ''; % L'utente ha annullato o lasciato vuoto
+                end
+            end
+
+            if cal_params.popup_PC_index == 4 % IscoPump per Pressione di Confinamento
+                app.figure1.WindowStyle = 'normal'; drawnow;
+                isco_pump_pc_vector_name = inputdlg('Enter the exact name of the Isco Pump vector for Confining Pressure:', 'Isco Pump PC Vector', [1 50]);
+                pause(0.5)
+                app.figure1.WindowStyle = 'alwaysontop';
+                if ~isempty(isco_pump_pc_vector_name)
+                    cal_params.isco_pump_pc_vector_name = isco_pump_pc_vector_name{1};
+                else
+                    cal_params.isco_pump_pc_vector_name = ''; % L'utente ha annullato o lasciato vuoto
+                end
+            end
+
             % 2. Chiama la funzione di calibrazione esterna
             handles = calibrate_data(handles, cal_params);
             
