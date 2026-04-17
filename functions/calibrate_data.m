@@ -430,13 +430,19 @@ disp(' -> Estimating Temperature from mechanical data...');
 dn=50;
 time2=cumsum(new_handles.Stamp);
 if any(strcmp(fieldnames(new),'vel'))
-    [Temp]=temp(new_handles.Time/1000,new.vel,new.shear1,new.slip, dn);
-elseif max(new.vel) <= 20e-3
-    [Temp]=temp(new_handles.Time/1000,new.SlipVel_Enc_1,new.shear1,new.Slip_Enc_1,dn);
-else
+    if max(new.vel) <= 20e-3 && any(strcmp(fieldnames(new),'SlipVel_Enc_1'))
+        [Temp]=temp(new_handles.Time/1000,new.SlipVel_Enc_1,new.shear1,new.Slip_Enc_1,dn);
+        new.TempE=interp1(time2(1:dn:end),Temp,time2);
+    else
+        [Temp]=temp(new_handles.Time/1000,new.vel,new.shear1,new.slip, dn);
+        new.TempE=interp1(time2(1:dn:end),Temp,time2);
+    end
+elseif any(strcmp(fieldnames(new),'SlipVel_Enc_2'))
     [Temp]=temp(new_handles.Time/1000,new.SlipVel_Enc_2,new.shear1,new.Slip_Enc_2,dn);
+    new.TempE=interp1(time2(1:dn:end),Temp,time2);
+else
+    disp('Not possible to perform temperature modelling')
 end
-new.TempE=interp1(time2(1:dn:end),Temp,time2);
 
 %% 3.11 Calibrazione dello Strain Gauge
 b=(strfind(new_handles.column,'StrainGauge')); j=0; n=[];
