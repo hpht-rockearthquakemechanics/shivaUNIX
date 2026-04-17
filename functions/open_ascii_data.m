@@ -34,6 +34,7 @@ for i=1:b
 end
 
 fgets(fid);    fgets(fid); i=0;
+file1=struct;
 if change
     while 1
         i=i+1;

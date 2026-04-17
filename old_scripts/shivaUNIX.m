@@ -139,41 +139,19 @@ function write_Callback(hObject, eventdata, handles)
     'Write as',['~/',handles.filename]);
 cd (pat)
 
-write_ascii_data(handles,nome)
+% Recupera lo stato degli elementi della GUI
+h_fluid = findobj('Tag', 'fluid');
+statoF = get(h_fluid, 'Value');
+
+h_GH = findobj('Tag', 'GH');
+statoGH = get(h_GH, 'Value');
+statoCAL = handles.Done;
+
+write_ascii_data(handles,nome, statoF, statoGH, statoCAL)
 
 end
 
 %% OPEN --------------------------------------------------------------------
-function OpenMenuItem_Callback(hObject, eventdata, handles)
-% hObject    handle to OpenMenuItem2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% 1. Pulisci la sessione precedente chiamando la funzione esterna
-handles = reset_session(handles);
-handles.load=0; % flag su load o open
-
-%definisce i grafici da plottare:
-%qui ci sono i default
-handles.g1=2;
-handles.g2=3;
-handles.g3=5;
-
-ax_=findobj('Tag','edit1'); set(ax_,'String',handles.g1);
-ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
-ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
-
-% 2. Seleziona il file e carica i dati
-[FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-    '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
-cd (PathName)
-
-handles = open_ascii_data(handles, FileName);
-
-guidata(hObject, handles);
-plotta_ora(handles);
-end
-
 function OpenMenuItem2_Callback(hObject, eventdata, handles)
 % hObject    handle to OpenMenuItem2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -957,7 +935,8 @@ function binary_Callback(hObject, eventdata, handles)
     'Write as',['~/',handles.filename]);
 cd (pat)
 
-write_ascii_data_red(handles,nome)
+write_ascii_data(handles,nome, 0, 0, 0)
+
 end
 
 %% SAVERED--------------------------------------------------------------------

@@ -1,18 +1,13 @@
-function write_ascii_data(handles,FileName)
+function write_ascii_data(handles,FileName,statoF,statoGH,statoCAL)
 
-h_=findobj('Tag','fluid');
-statoF=get(h_,'Value');
-h_=findobj('Tag','GH');
-statoGH=get(h_,'Value');
-
-% this logic breaks if we did not do calibration - sanity check on a
-% special variable to be stored in handles
 if statoF==1
     I={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};
 elseif statoGH==1
     I={'Time' 'shear1' 'Normal' 'Mu1' 'dspring' 'LVDT_low' 'vel' 'slip' 'TempE' 'TempM'};
-else
+elseif statoCAL==1 %calibration check
     I={'Time' 'shear1' 'Normal' 'Mu1' 'LVDT_low' 'vel' 'slip' 'TempE'};
+else
+    I=handles.column;
 end
 
 for j=1:length(I); %1:length(handles.column)
