@@ -171,9 +171,10 @@ ax_=findobj('Tag','edit1'); set(ax_,'String',handles.g1);
 ax_=findobj('Tag','edit2'); set(ax_,'String',handles.g2);
 ax_=findobj('Tag','edit3'); set(ax_,'String',handles.g3);
 
+cfg=get_config();
 % 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-    '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
+    cfg.ascii_data_root_path);
 cd (PathName)
 
 handles = open_ascii_data(handles, FileName);
@@ -709,8 +710,9 @@ if get(hObject,'Value') == 1
         'Load GEFRAN Data', 'Yes', 'No', 'No');
     
     if strcmp(ButtonName, 'Yes')
+        cfg = get_config();
         % --- Logica di selezione file ---
-        Path2 = '/media/disk1/shivadir/Shiva Experiments';
+        Path2 = cfg.gefran_data_root_path;
         name = handles.filename(1:4);
         gefran_file_path = '';
 
@@ -720,7 +722,7 @@ if get(hObject,'Value') == 1
             name2 = dir([Path2 '*.txt']);
             gefran_file_path = fullfile(Path2, name2(1).name);
         else
-            [FileGEF, Path] = uigetfile('/media/disk1/shivadir/*.txt', 'Select the GEFRAN file to load');
+            [FileGEF, Path] = uigetfile([cfg.gefran_data_root_path '/*.txt'], 'Select the GEFRAN file to load');
             if ~isequal(FileGEF, 0)
                 gefran_file_path = fullfile(Path, FileGEF);
             end
@@ -911,9 +913,10 @@ h_=findobj('Tag','edit1LB'); set(h_,'String',1);
 h_=findobj('Tag','edit2LB'); set(h_,'String',1);
 h_=findobj('Tag','edit3LB'); set(h_,'String',1);
 
+cfg = get_config();
 % 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-    'C:\Users\Stefano\Dropbox\Ricerca\SHIVA');
+    cfg.mat_data_root_path);
 
 cd (PathName)
 

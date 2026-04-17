@@ -54,7 +54,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
         calibration                  matlab.ui.control.DropDown
         nodeEnc2label                matlab.ui.control.Label
         nodeEnc1label                matlab.ui.control.Label
-        incremental                  matlab.ui.control.Button
+        incremental                  matlab.ui.control.StateButton
         filtvel                      matlab.ui.control.StateButton
         brutalfilt                   matlab.ui.control.EditField
         offsetEncoder0               matlab.ui.control.Button
@@ -242,8 +242,9 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                 app.figure1.WindowStyle = 'alwaysontop';
 
                 if strcmp(ButtonName, 'Yes')
+                    cfg = get_config();
                     % --- Logica di selezione file ---
-                    Path2 = '/media/disk1/shivadir/Shiva Experiments';
+                    Path2 = cfg.gefran_data_root_path;
                     name = handles.filename(1:4);
                     gefran_file_path = '';
 
@@ -254,7 +255,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                         gefran_file_path = fullfile(Path2, name2(1).name);
                     else
                         app.figure1.WindowStyle = 'normal'; drawnow;
-                        [FileGEF, Path] = uigetfile('/media/disk1/shivadir/*.txt', 'Select the GEFRAN file to load');
+                        [FileGEF, Path] = uigetfile([cfg.gefran_data_root_path '/*.txt'], 'Select the GEFRAN file to load');
                         app.figure1.WindowStyle = 'alwaysontop';
 
                         if ~isequal(FileGEF, 0)
@@ -294,9 +295,10 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             ax_=findobj('Tag','edit2'); set(ax_,'Value',string(handles.g2));
             ax_=findobj('Tag','edit3'); set(ax_,'Value',string(handles.g3));
 
+            cfg = get_config();
             app.figure1.WindowStyle = 'normal';
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-                '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
+                cfg.mat_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
 
             cd (PathName)
@@ -330,10 +332,11 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             ax_=app.edit1; set(ax_,'Value',string(handles.g1));
             ax_=app.edit2; set(ax_,'Value',string(handles.g2));
             ax_=app.edit3; set(ax_,'Value',string(handles.g3));
-
+            
+            cfg=get_config();
             app.figure1.WindowStyle = 'normal';
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
-                '\\10.164.3.225\spagnuolo\SHIVA-ACQ');
+                cfg.ascii_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
             cd (PathName)
 
@@ -1469,11 +1472,11 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.filtvel.Layout.Column = 10;
 
             % Create incremental
-            app.incremental = uibutton(app.GridLayout, 'push');
+            app.incremental = uibutton(app.GridLayout, 'state');
             app.incremental.Tag = 'incremental';
+            app.incremental.Text = 'incremental';
             app.incremental.Layout.Row = 5;
             app.incremental.Layout.Column = 8;
-            app.incremental.Text = 'incremental';
 
             % Create nodeEnc1label
             app.nodeEnc1label = uilabel(app.GridLayout);

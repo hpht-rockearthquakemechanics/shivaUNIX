@@ -41,7 +41,8 @@ thick=5e-2;
 %%
 
 %__________________Input Thermal propeties (from file "thermal.txt")
-patty='thermal.txt';
+cfg = get_config();
+patty = cfg.thermal_properties_file;
 fid=fopen(patty,'r');
 if fid==0 | fid ==-1
     c=2200;
@@ -96,7 +97,7 @@ sl=slip(tI:dn:end);
 
 %themal parameters water
 Lh=1.5E6; %latent heat vaporization
-cw=4186; %Joules per kg per °K %thermal capacity water
+cw=4186; %Joules per kg per ï¿½K %thermal capacity water
 Rhow=999.97; %water density
 
 %______________________ initialize variables
@@ -108,8 +109,8 @@ Temp(1:2)=0; Tf(1:2)=0; Ta(1:2)=0;
 Ma=60; %number of contact aperities;
 F=12500; %normal force;
 Pm=1900E6; % cantact stress; %190E6 calcite; 1900e6 feldspars (i.e. gabbro)
-ar=sqrt(F/Ma/pi/Pm); %raggio delle asperità di contatto
-Vw=ha*(pi*(2*ar)^2-pi*(ar^2)); %volume d'acqua tra le asperità
+ar=sqrt(F/Ma/pi/Pm); %raggio delle asperitï¿½ di contatto
+Vw=ha*(pi*(2*ar)^2-pi*(ar^2)); %volume d'acqua tra le asperitï¿½
 vmod=smooth(v,500);
 tc = (ar)./vmod; tc=ones(size(s)).*tc; %contact time on the asperities
 sa=ones(size(s)).*0.6*Pm;           %effective shear stress on the asperities
@@ -131,7 +132,7 @@ for m=3:M
     cc=0;
     ff=0;
     aa=0; %temperatura RH
-    dd=0; %sulle asperità con acqua
+    dd=0; %sulle asperitï¿½ con acqua
     ee=0; %trasferito all'acqua
     
     for n=2:m-1
@@ -218,12 +219,10 @@ for m=3:M
         ee=ee+ff;
     end
     Temp(m) = aa ; %RH con il flag sulla reazione
-    Ta(m)= dd; %sulle asperità con acqua
+    Ta(m)= dd; %sulle asperitï¿½ con acqua
     Tf(m)=ee;  %in acqua con vaporizzazione
     
 end
 
 
 %figure; plot(vmod, Temp, vmod, Ta ); legend('Temp','Ta')
-
-
