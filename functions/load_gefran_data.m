@@ -45,7 +45,25 @@ new_fnames = fieldnames(new);
 for i = 1:length(new_fnames)
     new_handles.(new_fnames{i}) = new.(new_fnames{i});
 end
-new_handles.column = [new_handles.column, new_fnames'];
+
+% Aggiorna la lista delle colonne
+sz=size(new_handles.column);
+sz2=size(new_fnames);
+
+if sz(1)>1 %is a column
+    if sz2(1)>1 % also a column
+        new_handles.column=[new_handles.column; new_fnames];
+    else % is a row, need to transpose
+        new_handles.column=[new_handles.column; new_fnames'];
+    end
+else % is a row
+    if sz2(1)>1 % is a column, need to transpose
+        new_handles.column = [new_handles.column, new_fnames'];
+    else % is a row
+        new_handles.column = [new_handles.column, new_fnames];
+    end
+    % maybe transpose new_handles.column
+end
 
 disp(' -> GEFRAN data loaded successfully.');
 end
