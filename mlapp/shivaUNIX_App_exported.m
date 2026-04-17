@@ -1010,7 +1010,12 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.figure1.WindowStyle='alwaysontop';
             cd (pat)
 
-            save_mat_data_red(handles,nome)
+            % Recupera lo stato degli elementi della GUI
+            statoF = app.fluid.Value;
+            statoGH = app.GH.Value;
+            statoCAL = handles.Done;
+
+            save_mat_data(handles, nome, statoF, statoGH, statoCAL)
         end
 
         % Menu selected function: save
@@ -1033,7 +1038,7 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.figure1.WindowStyle='alwaysontop';
             cd (pat)
             
-            save_mat_data(handles,nome)
+            save_mat_data(handles, nome, 0, 0, 0)
         end
 
         % Value changed function: smooth

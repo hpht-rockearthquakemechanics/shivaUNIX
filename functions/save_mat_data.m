@@ -1,6 +1,17 @@
-function save_mat_data(handles,FileName)
+function save_mat_data (handles, Name, statoF, statoGH, statoCAL)
 
-handles.save=handles.column;
+file_suffix='.mat';
+
+if statoF==1
+    handles.save={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};
+elseif statoGH==1
+    handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'dspring' 'LVDT_low' 'vel' 'slip'}; %'TempE' 'TempM'};
+elseif statoCAL==1
+    handles.save={'Time' 'shear1' 'Normal' 'Mu1' 'LVDT_low' 'vel' 'slip' 'TempE'};
+else
+    handles.save=handles.column;
+    file_suffix='RED.mat';
+end
 
 
 for j=1:length(handles.save)
@@ -23,9 +34,9 @@ M1=cell2mat(M');
 %end
 
 %file header
-name4=['header', FileName];
-
-nome2=[FileName, 'RED.mat'];
+name4=['header', Name];
+nome2=[Name, file_suffix];
+%nome3=['originali', nome];
 
 eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
 %eval(['save(nome3,''-struct'',''handles'',' O1 ');'])

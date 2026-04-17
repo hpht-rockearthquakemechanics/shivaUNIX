@@ -954,7 +954,15 @@ pat0=pwd;
     'Save as',[pat0 '/' handles.filename]);
 cd (pat)
 
-save_mat_data_red(handles,nome)
+% Recupera lo stato degli elementi della GUI
+h_fluid = findobj('Tag', 'fluid');
+statoF = get(h_fluid, 'Value');
+
+h_GH = findobj('Tag', 'GH');
+statoGH = get(h_GH, 'Value');
+statoCAL = handles.Done;
+
+save_mat_data(handles,nome, statoF, statoGH, statoCAL)
 
 end
 %% SAVE--------------------------------------------------------------------
@@ -969,7 +977,8 @@ pat0=pwd;
     'Save as',[pat0 '/' handles.filename]);
 cd (pat)
 
-save_mat_data(handles,nome)
+save_mat_data(handles,nome, 0, 0, 0)
+
 end
 %% obj Callback
 function cut_dt_CreateFcn(hObject, eventdata, handles)
