@@ -14,6 +14,10 @@ function new_handles = recalculate_temperature(handles, AI_states)
 %--------------------------------------------------------------------------
 
 new_handles = handles;
+
+params = struct('AI_states',AI_states);
+new_handles.log = append_action_to_log(new_handles.log, 'recalculate_temperature', params);
+
 new = struct();
 
 % Cerca i canali configurati come termocoppie (TC, stato 3)

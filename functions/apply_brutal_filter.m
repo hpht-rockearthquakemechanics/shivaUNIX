@@ -16,6 +16,9 @@ function new_handles = apply_brutal_filter(handles, column_index, filter_param)
 disp(['Applying brutal filter to column ', num2str(column_index), '...']);
 new_handles = handles;
 
+params = struct('column_index',column_index,'filter_param',filter_param);
+new_handles.log = append_action_to_log(new_handles.log, 'apply_brutal_filter', params);
+
 col_name = new_handles.column{column_index};
 backup_col_name = [col_name, 'o'];
 

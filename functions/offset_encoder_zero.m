@@ -15,6 +15,8 @@ function new_handles = offset_encoder_zero(handles)
 disp('Applying zero offset to encoders...');
 new_handles = handles;
 
+new_handles.log = append_action_to_log(new_handles.log, 'offset_encoder_zero', struct());
+
 if ~isfield(new_handles, 'triggered') || new_handles.triggered == 0
     disp(' -> Warning: Trigger point not set. Cannot apply offset.');
     return;

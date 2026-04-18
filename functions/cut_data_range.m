@@ -16,6 +16,9 @@ function new_handles = cut_data_range(handles, range_indices)
 disp(['Cutting data from index ', num2str(range_indices(1)), ' to ', num2str(range_indices(2)), '...']);
 new_handles = handles;
 
+params = struct('range_indices',range_indices);
+new_handles.log = append_action_to_log(new_handles.log, 'cut_data_range', params);
+
 start_idx = range_indices(1);
 end_idx = range_indices(2);
 

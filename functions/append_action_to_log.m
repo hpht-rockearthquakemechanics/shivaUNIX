@@ -22,12 +22,33 @@ function updated_log = append_action_to_log(current_log, func_name, params_struc
     try
         function_path = which(func_name);
         if ~isempty(function_path) && ~strcmp(function_path, 'built-in')
-            % Assicura che il percorso sia tra virgolette per gestire eventuali spazi
-            git_command = sprintf('git log -1 --pretty=format:%%H -- "%s"', function_path);
-            [status, cmdout] = system(git_command);
+            [file_dir, ~, ~] = fileparts(function_path);
             
-            if status == 0 && ~isempty(cmdout)
-                new_action.commit_hash = strtrim(cmdout);
+            % 1. Trova la cartella radice del repository Git
+            find_root_cmd = sprintf('git -C "%s" rev-parse --show-toplevel', file_dir);
+            [status_root, repo_root_path] = system(find_root_cmd);
+            
+            if status_root == 0 && ~isempty(repo_root_path)
+                repo_root_path_clean = strtrim(repo_root_path);
+                
+                % Salva la directory corrente e spostati temporaneamente nella radice del repo
+                original_dir = pwd;
+                cd(repo_root_path_clean);
+                
+                % 2. Esegui il comando git log. Non è più necessario -C perché siamo già nella cartella giusta.
+                % Passare gli argomenti come un array di celle a 'system' è più robusto
+                % per gestire percorsi con spazi.
+                git_command_parts = {'git', 'log', '-1', '--pretty=format:%H', '--', function_path};
+                [status_log, cmdout_log] = system(strjoin(git_command_parts, ' '));
+                
+                % Ripristina immediatamente la directory originale
+                cd(original_dir);
+                
+                if status_log == 0 && ~isempty(cmdout_log)
+                    new_action.commit_hash = strtrim(cmdout_log);
+                else
+                    new_action.commit_hash = 'N/A (git log failed)';
+                end
             else
                 new_action.commit_hash = 'N/A (file not in git repo or not committed)';
             end
@@ -51,4 +72,7 @@ function updated_log = append_action_to_log(current_log, func_name, params_struc
     
     % (Opzionale) Stampa a schermo per debug durante lo sviluppo
     fprintf('Aggiunta azione al log: %s\n', new_action.function_name);
+    
+    % Assegna il log aggiornato alla variabile di output
+    updated_log = current_log;
 end

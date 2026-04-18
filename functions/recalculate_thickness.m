@@ -16,6 +16,10 @@ function new_handles = recalculate_thickness(handles, ztl, zts)
 %--------------------------------------------------------------------------
 
 new_handles = handles;
+
+params = struct('ztl',ztl,'zts',zts);
+new_handles.log = append_action_to_log(new_handles.log, 'recalculate_thickness', params);
+
 new = struct();
 
 cal.lv(1) = 5.0634;

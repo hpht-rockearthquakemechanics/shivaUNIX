@@ -73,6 +73,9 @@ cd ..
 % add all subfolders to path
 addpath(genpath(pwd))
 
+% initialize log
+handles.log={};
+
 set(handles.figure1, 'units', 'normalized', 'position', [0.01 0.01 0.9 0.9])
 
 axes(handles.axes6)
@@ -148,6 +151,9 @@ statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
 write_ascii_data(handles,nome, statoF, statoGH, statoCAL)
+
+% Salva il log in formato JSON chiamando la funzione dedicata
+save_log_to_json(handles, fullfile(pat, nome));
 
 end
 
@@ -922,6 +928,9 @@ cd (PathName)
 
 handles=load_mat_data(handles,FileName);
 
+% Dopo aver caricato i dati, chiama la funzione dedicata per caricare il log
+handles.log = load_log_from_json(fullfile(PathName, FileName));
+
 guidata(hObject, handles);
 plotta_ora(handles);
 end
@@ -939,6 +948,9 @@ function binary_Callback(hObject, eventdata, handles)
 cd (pat)
 
 write_ascii_data(handles,nome, 0, 0, 0)
+
+% Salva il log in formato JSON chiamando la funzione dedicata
+save_log_to_json(handles, fullfile(pat, nome));
 
 end
 
@@ -965,7 +977,10 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
-save_mat_data(handles,nome, statoF, statoGH, statoCAL)
+mat_file_path = save_mat_data(handles,nome, statoF, statoGH, statoCAL);
+
+% Salva il log in formato JSON chiamando la funzione dedicata
+save_log_to_json(handles, mat_file_path);
 
 end
 %% SAVE--------------------------------------------------------------------
@@ -980,7 +995,10 @@ pat0=pwd;
     'Save as',[pat0 '/' handles.filename]);
 cd (pat)
 
-save_mat_data(handles,nome, 0, 0, 0)
+mat_file_path = save_mat_data(handles,nome, 0, 0, 0);
+
+% Salva il log in formato JSON chiamando la funzione dedicata
+save_log_to_json(handles, mat_file_path);
 
 end
 %% obj Callback

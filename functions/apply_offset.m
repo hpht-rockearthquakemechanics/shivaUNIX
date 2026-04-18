@@ -16,6 +16,9 @@ function new_handles = apply_offset(handles, selected_columns_indices, offset_in
 disp('Applying offset to selected data...');
 new_handles = handles;
 
+params = struct('selected_columns_indices',selected_columns_indices,'offset_index',offset_index);
+new_handles.log = append_action_to_log(new_handles.log, 'apply_offset', params);
+
 for n = selected_columns_indices
     col_name = new_handles.column{n};
     offset_value = new_handles.(col_name)(offset_index);

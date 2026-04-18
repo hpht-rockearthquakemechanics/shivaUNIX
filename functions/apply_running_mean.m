@@ -17,6 +17,9 @@ function new_handles = apply_running_mean(handles, column_index, range_indices)
 disp('Applying running mean...');
 new_handles = handles;
 
+params = struct('column_index',column_index,'range_indices',range_indices);
+new_handles.log = append_action_to_log(new_handles.log, 'apply_running_mean', params);
+
 col_name = new_handles.column{column_index};
 
 mean_value = mean(new_handles.(col_name)(range_indices(1):range_indices(2),:));

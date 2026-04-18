@@ -18,6 +18,9 @@ function new_handles = recalculate_stress(handles, rint, rext, calibration_index
 %--------------------------------------------------------------------------
 
 new_handles = handles;
+params = struct('rint', rint, 'rext', rext, 'calibration_index', calibration_index, 'is_GH', is_GH, 'pf_index', pf_index);
+new_handles.log = append_action_to_log(new_handles.log, 'recalculate_stress', params);
+
 new = struct();
 contents = calibration_index;
 

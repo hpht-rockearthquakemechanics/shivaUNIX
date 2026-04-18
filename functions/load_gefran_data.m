@@ -16,6 +16,9 @@ function new_handles = load_gefran_data(handles, gefran_file_path)
 disp('Loading and processing GEFRAN data...');
 new_handles = handles;
 
+params = struct('gefran_file_path',gefran_file_path);
+new_handles.log = append_action_to_log(new_handles.log, 'load_gefran_data', params);
+
 % --- 1. Rimuovi i dati GEFRAN precedenti ---
 gefran_fields = {'SpeedGEF', 'timeGEF', 'TorqueGEF', 'VGEF', 'TqGEF'};
 for i = 1:length(gefran_fields)

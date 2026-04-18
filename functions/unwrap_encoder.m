@@ -15,6 +15,9 @@ function new_handles = unwrap_encoder(handles)
 disp('Unwrapping Encoder data...');
 new_handles = handles;
 
+params = struct();
+new_handles.log = append_action_to_log(new_handles.log, 'unwrap_encoder', params);
+
 b = strfind(new_handles.column, 'Encoder2');
 n_idx = find(~cellfun('isempty', b), 1);
 

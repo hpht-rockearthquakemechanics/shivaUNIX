@@ -16,6 +16,10 @@ function new_handles = remove_outliers(handles, column_index, outlier_indices, b
 
 disp('Removing outliers...');
 new_handles = handles;
+
+params = struct('column_index',column_index,'outlier_indices',outlier_indices,'button_type',button_type);
+new_handles.log = append_action_to_log(new_handles.log, 'remove_outliers', params);
+
 col_name = new_handles.column{column_index};
 
 if button_type == 3 % Tasto destro: sostituzione punto per punto

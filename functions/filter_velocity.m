@@ -16,6 +16,9 @@ function new_handles = filter_velocity(handles, transition_index)
 disp('Filtering velocity and slip data...');
 new_handles = handles;
 
+params = struct('transition_index',transition_index);
+new_handles.log = append_action_to_log(new_handles.log, 'filter_velocity', params);
+
 ya = new_handles.Slip_Enc_1(:,1);
 yb = new_handles.Slip_Enc_2(:,1);
 xt = new_handles.Time / 1000; % Time in seconds

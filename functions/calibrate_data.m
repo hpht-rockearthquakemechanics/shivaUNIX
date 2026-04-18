@@ -24,6 +24,8 @@ function new_handles = calibrate_data(handles, cal_params)
 
 new_handles = handles; % Inizia con la struttura esistente
 
+new_handles.log = append_action_to_log(new_handles.log, 'calibrate_data', cal_params);
+
 disp('Starting full data calibration...');
 
 % --- 1. PULIZIA INIZIALE ---

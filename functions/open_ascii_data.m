@@ -2,6 +2,8 @@ function new_handles = open_ascii_data(handles, FileName)
 
 new_handles = handles;
 
+new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', FileName));
+
 %definisce i parametri da matrice
 %new_handles.column=importdata(FileName,'\t',1);
 

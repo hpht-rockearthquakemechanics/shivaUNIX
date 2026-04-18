@@ -39,6 +39,10 @@ if isfield(handles, 'column')
     end
 end
 
+% --- 3. Pulisci il log ---
+handles.log = {};
+disp(' -> Log has been reset.');
+
 new_handles = handles;
 disp(' -> Session reset complete.');
 end

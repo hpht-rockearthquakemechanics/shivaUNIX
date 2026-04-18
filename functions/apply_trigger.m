@@ -15,6 +15,9 @@ function new_handles = apply_trigger(handles, trigger_index)
 disp('Applying time trigger...');
 new_handles = handles;
 
+params = struct('trigger_index',trigger_index);
+new_handles.log = append_action_to_log(new_handles.log, 'apply_trigger', params);
+
 new_handles.triggered = new_handles.RateZero(trigger_index);
 new_handles.Time = new_handles.Time - new_handles.Time(trigger_index);
 

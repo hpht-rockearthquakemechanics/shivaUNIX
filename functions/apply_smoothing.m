@@ -16,6 +16,9 @@ function new_handles = apply_smoothing(handles, column_index, window_size)
 disp(['Applying smoothing to column ', num2str(column_index), '...']);
 new_handles = handles;
 
+params = struct('column_index',column_index,'window_size',window_size);
+new_handles.log = append_action_to_log(new_handles.log, 'apply_smoothing', params);
+
 col_name = new_handles.column{column_index};
 backup_col_name = [col_name, 'o'];
 

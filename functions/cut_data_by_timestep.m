@@ -15,6 +15,9 @@ function new_handles = cut_data_by_timestep(handles, dt_value)
 disp(['Cutting data to keep only time step = ', num2str(dt_value), '...']);
 new_handles = handles;
 
+params = struct('dt_value',dt_value);
+new_handles.log = append_action_to_log(new_handles.log, 'cut_data_by_timestep', params);
+
 indices_to_keep = find(new_handles.Stamp(:,1) == dt_value);
 
 if length(indices_to_keep) <= 100

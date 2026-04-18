@@ -1,4 +1,7 @@
-function save_mat_data (handles, Name, statoF, statoGH, statoCAL)
+function final_file_path = save_mat_data (handles, Name, statoF, statoGH, statoCAL)
+
+params = struct('Name',Name,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
+handles.log = append_action_to_log(handles.log, 'save_mat_data', params);
 
 file_suffix='.mat';
 
@@ -41,5 +44,8 @@ nome2=[Name, file_suffix];
 eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
 %eval(['save(nome3,''-struct'',''handles'',' O1 ');'])
 %save('parametri','-struct','handles','loadT','shearT','triggered','cutted','dt','sm')
+
+% Restituisci il percorso completo del file salvato
+final_file_path = fullfile(pwd, nome2);
 
 end

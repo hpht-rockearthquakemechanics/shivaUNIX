@@ -15,6 +15,9 @@ function new_handles = decimate_data(handles, decimation_factor)
 disp(['Decimating data by a factor of ', num2str(decimation_factor), '...']);
 new_handles = handles;
 
+params = struct('decimation_factor',decimation_factor);
+new_handles.log = append_action_to_log(new_handles.log, 'decimate_data', params);
+
 for n = 1:length(new_handles.column)
     col_name = new_handles.column{n};
     new_handles.(col_name) = downsample(new_handles.(col_name), decimation_factor);
