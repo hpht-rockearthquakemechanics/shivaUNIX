@@ -1,4 +1,4 @@
-function handles = write_ascii_data(handles,full_file_path,statoF,statoGH,statoCAL)
+function [final_path, handles] = write_ascii_data(handles,full_file_path,statoF,statoGH,statoCAL)
 
 params = struct('FileName',full_file_path,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
 handles.log = append_action_to_log(handles.log, 'write_ascii_data', params);
@@ -12,6 +12,16 @@ elseif statoCAL==1 %calibration check
 else
     I=handles.column;
 end
+
+% Filtra la lista 'I' per includere solo i campi che esistono realmente in 'handles'
+existing_fields_mask = isfield(handles, I);
+I_filtered = I(existing_fields_mask);
+
+if ~isequal(I, I_filtered)
+    missing_fields = I(~existing_fields_mask);
+    warning('write_ascii_data:missing_fields', 'I seguenti campi richiesti non sono stati trovati e verranno saltati: %s', strjoin(missing_fields, ', '));
+end
+I = I_filtered; % Usa la lista filtrata da ora in poi
 
 for j=1:length(I); %1:length(handles.column)
     C(j,1)={'%10.6f '};

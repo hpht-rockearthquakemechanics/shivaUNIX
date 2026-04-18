@@ -394,10 +394,10 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             if isequal(nome,0) || isequal(pat,0), return; end
             app.figure1.WindowStyle='alwaysontop';
             
-            handles = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
+            [final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
-            save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
+            save_log_to_json(handles, final_txt_path);
         end
 
         % Value changed function: brutalfilt
@@ -1181,10 +1181,10 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             statoGH = app.GH.Value;
             statoCAL = handles.Done;
 
-            handles = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
+            [final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
-            save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
+            save_log_to_json(handles, final_txt_path);
         end
 
         % Button pushed function: zoom

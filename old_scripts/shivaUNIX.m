@@ -150,10 +150,10 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
-handles = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
+[final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
-save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
+save_log_to_json(handles, final_txt_path);
 
 end
 
@@ -946,10 +946,10 @@ function binary_Callback(hObject, eventdata, handles)
     'Write as',fullfile(pwd, handles.filename));
 if isequal(nome,0) || isequal(pat,0), return; end
 
-handles = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
+[final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
-save_log_to_json(handles, fullfile(pat, nome));
+save_log_to_json(handles, final_txt_path);
 
 end
 
