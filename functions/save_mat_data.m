@@ -1,4 +1,4 @@
-function final_file_path = save_mat_data (handles, Name, statoF, statoGH, statoCAL)
+function [final_file_path, handles] = save_mat_data (handles, Name, statoF, statoGH, statoCAL)
 
 params = struct('Name',Name,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
 handles.log = append_action_to_log(handles.log, 'save_mat_data', params);

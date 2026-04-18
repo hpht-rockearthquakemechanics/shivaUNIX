@@ -1,4 +1,4 @@
-function write_ascii_data(handles,FileName,statoF,statoGH,statoCAL)
+function handles = write_ascii_data(handles,FileName,statoF,statoGH,statoCAL)
 
 params = struct('FileName',FileName,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
 handles.log = append_action_to_log(handles.log, 'write_ascii_data', params);

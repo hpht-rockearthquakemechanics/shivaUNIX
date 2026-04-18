@@ -150,7 +150,7 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
-write_ascii_data(handles,nome, statoF, statoGH, statoCAL)
+handles = write_ascii_data(handles,nome, statoF, statoGH, statoCAL);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, fullfile(pat, nome));
@@ -947,7 +947,7 @@ function binary_Callback(hObject, eventdata, handles)
     'Write as',['~/',handles.filename]);
 cd (pat)
 
-write_ascii_data(handles,nome, 0, 0, 0)
+handles = write_ascii_data(handles,nome, 0, 0, 0);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, fullfile(pat, nome));
@@ -976,8 +976,8 @@ statoF = get(h_fluid, 'Value');
 h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
-
-mat_file_path = save_mat_data(handles,nome, statoF, statoGH, statoCAL);
+ 
+[mat_file_path, handles] = save_mat_data(handles,nome, statoF, statoGH, statoCAL);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);
@@ -995,7 +995,7 @@ pat0=pwd;
     'Save as',[pat0 '/' handles.filename]);
 cd (pat)
 
-mat_file_path = save_mat_data(handles,nome, 0, 0, 0);
+[mat_file_path, handles] = save_mat_data(handles,nome, 0, 0, 0);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);
