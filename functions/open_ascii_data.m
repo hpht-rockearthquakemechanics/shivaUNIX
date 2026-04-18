@@ -1,9 +1,9 @@
-function new_handles = open_ascii_data(handles, full_file_path)
+function new_handles = open_ascii_data(handles, full_file_path, hv)
 
 new_handles = handles;
 
 % Logga il percorso completo del file
-new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', full_file_path));
+new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', full_file_path, 'hv', hv));
 
 %definisce i parametri da matrice
 %new_handles.column=importdata(FileName,'\t',1);
@@ -104,7 +104,6 @@ new_handles.column{num+1}='RateZero';
 eval(['new_handles.' new_handles.column{num+1} '= [1:1:length(file1.data(ll:nn,1))]''; '])
 
 % --> ele
-hv=get(new_handles.XLab(1),'Value');
 new_handles.TimeZero=cumsum(new_handles.Stamp);
 new_handles.Time=zeros(size(new_handles.Stamp));
 new_handles.Time(1)=hv*new_handles.Stamp(1);

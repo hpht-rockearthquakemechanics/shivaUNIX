@@ -183,7 +183,9 @@ cfg=get_config();
     cfg.ascii_data_root_path);
 if isequal(FileName,0) || isequal(PathName,0), return; end
 
-handles = open_ascii_data(handles, fullfile(PathName, FileName));
+% Passa il valore richiesto dalla UI alla funzione
+h_xlab = findobj('Tag', 'XLab');
+handles = open_ascii_data(handles, fullfile(PathName, FileName), get(h_xlab, 'Value'));
 
 guidata(hObject, handles);
 plotta_ora(handles);

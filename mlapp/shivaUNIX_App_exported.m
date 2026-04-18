@@ -344,8 +344,8 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.figure1.WindowStyle = 'alwaysontop';
             if isequal(FileName,0) || isequal(PathName,0), return; end
 
-            handles = open_ascii_data(handles, fullfile(PathName, FileName));
-
+            handles = open_ascii_data(handles, fullfile(PathName, FileName), find(strcmp(app.XLab.Items, app.XLab.Value)));
+            
             guidata(hObject, handles);
             plotta_ora(app, handles);
         end
