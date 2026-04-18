@@ -1,6 +1,7 @@
-function [final_file_path, handles] = save_mat_data (handles, Name, statoF, statoGH, statoCAL)
+function [final_file_path, handles] = save_mat_data (handles, full_save_path, statoF, statoGH, statoCAL)
 
-params = struct('Name',Name,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
+% Logga il percorso completo che si intende salvare
+params = struct('Name',full_save_path,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
 handles.log = append_action_to_log(handles.log, 'save_mat_data', params);
 
 file_suffix='.mat';
@@ -16,6 +17,9 @@ else
     file_suffix='RED.mat';
 end
 
+[path, name, ~] = fileparts(full_save_path);
+final_file_name = [name, file_suffix];
+final_file_path = fullfile(path, final_file_name);
 
 for j=1:length(handles.save)
     if j==length(handles.save)
@@ -37,15 +41,8 @@ M1=cell2mat(M');
 %end
 
 %file header
-name4=['header', Name];
-nome2=[Name, file_suffix];
-%nome3=['originali', nome];
-
-eval(['save(nome2,''-struct'',''handles'',' M1 ');'])
+eval(['save(final_file_path,''-struct'',''handles'',' M1 ');'])
 %eval(['save(nome3,''-struct'',''handles'',' O1 ');'])
 %save('parametri','-struct','handles','loadT','shearT','triggered','cutted','dt','sm')
-
-% Restituisci il percorso completo del file salvato
-final_file_path = fullfile(pwd, nome2);
 
 end

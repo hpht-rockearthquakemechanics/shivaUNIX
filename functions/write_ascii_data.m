@@ -1,6 +1,6 @@
-function handles = write_ascii_data(handles,FileName,statoF,statoGH,statoCAL)
+function handles = write_ascii_data(handles,full_file_path,statoF,statoGH,statoCAL)
 
-params = struct('FileName',FileName,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
+params = struct('FileName',full_file_path,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
 handles.log = append_action_to_log(handles.log, 'write_ascii_data', params);
 
 if statoF==1
@@ -56,8 +56,9 @@ end
 S1=cell2mat(S');
 
 %write in a file
-nome2=[FileName, 'RED.txt'];
-fid = fopen(nome2,'wt');
+[path, name, ~] = fileparts(full_file_path);
+final_path = fullfile(path, [name, 'RED.txt']);
+fid = fopen(final_path,'wt');
 eval(['fprintf(fid,''' S1 ''',' M1 ');'])
 
 eval(['len=length(handles.' handles.column{1} ');'])

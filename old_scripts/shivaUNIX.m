@@ -139,8 +139,8 @@ function write_Callback(hObject, eventdata, handles)
 [nome,pat]=uiputfile( ...
     {'*.txt', 'All MATLAB Files (*txt)'; ...
     '*.*',                   'All Files (*.*)'}, ...
-    'Write as',['~/',handles.filename]);
-cd (pat)
+    'Write as',fullfile(pwd, handles.filename));
+if isequal(nome,0) || isequal(pat,0), return; end
 
 % Recupera lo stato degli elementi della GUI
 h_fluid = findobj('Tag', 'fluid');
@@ -150,10 +150,10 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
-handles = write_ascii_data(handles,nome, statoF, statoGH, statoCAL);
+handles = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
-save_log_to_json(handles, fullfile(pat, nome));
+save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
 
 end
 
@@ -181,9 +181,9 @@ cfg=get_config();
 % 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
     cfg.ascii_data_root_path);
-cd (PathName)
+if isequal(FileName,0) || isequal(PathName,0), return; end
 
-handles = open_ascii_data(handles, FileName);
+handles = open_ascii_data(handles, fullfile(PathName, FileName));
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -923,13 +923,12 @@ cfg = get_config();
 % 2. Seleziona il file e carica i dati
 [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
     cfg.mat_data_root_path);
+if isequal(FileName,0) || isequal(PathName,0), return; end
 
-cd (PathName)
-
-handles=load_mat_data(handles,FileName);
+handles=load_mat_data(handles,fullfile(PathName, FileName));
 
 % Dopo aver caricato i dati, chiama la funzione dedicata per caricare il log
-handles.log = load_log_from_json(fullfile(PathName, FileName));
+handles.log = load_log_from_json(fullfile(PathName, FileName)); % This now correctly finds .mat.json
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -944,10 +943,10 @@ function binary_Callback(hObject, eventdata, handles)
 [nome,pat]=uiputfile( ...
     {'*.txt', 'All MATLAB Files (*txt)'; ...
     '*.*',                   'All Files (*.*)'}, ...
-    'Write as',['~/',handles.filename]);
-cd (pat)
+    'Write as',fullfile(pwd, handles.filename));
+if isequal(nome,0) || isequal(pat,0), return; end
 
-handles = write_ascii_data(handles,nome, 0, 0, 0);
+handles = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, fullfile(pat, nome));
@@ -966,8 +965,8 @@ pat0=pwd;
 [nome,pat]=uiputfile( ...
     {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
     '*.*',                   'All Files (*.*)'}, ...
-    'Save as',[pat0 '/' handles.filename]);
-cd (pat)
+    'Save as',fullfile(pat0, handles.filename));
+if isequal(nome,0) || isequal(pat,0), return; end
 
 % Recupera lo stato degli elementi della GUI
 h_fluid = findobj('Tag', 'fluid');
@@ -977,7 +976,7 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
  
-[mat_file_path, handles] = save_mat_data(handles,nome, statoF, statoGH, statoCAL);
+[mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);
@@ -992,10 +991,10 @@ pat0=pwd;
 [nome,pat]=uiputfile( ...
     {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
     '*.*',                   'All Files (*.*)'}, ...
-    'Save as',[pat0 '/' handles.filename]);
-cd (pat)
+    'Save as',fullfile(pat0, handles.filename));
+if isequal(nome,0) || isequal(pat,0), return; end
 
-[mat_file_path, handles] = save_mat_data(handles,nome, 0, 0, 0);
+[mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), 0, 0, 0);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);

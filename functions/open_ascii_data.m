@@ -1,13 +1,14 @@
-function new_handles = open_ascii_data(handles, FileName)
+function new_handles = open_ascii_data(handles, full_file_path)
 
 new_handles = handles;
 
-new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', FileName));
+% Logga il percorso completo del file
+new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', full_file_path));
 
 %definisce i parametri da matrice
 %new_handles.column=importdata(FileName,'\t',1);
 
-fid=fopen(FileName,'r');
+fid=fopen(full_file_path,'r');
 for i=1:3
     file1=fgets(fid);
 end
@@ -18,8 +19,8 @@ fclose(fid);
 [I]=find(file1==char(44)); change=false;
 if ~isempty(I); file1(I)=char(46); change=true; end
 A=sscanf(file1,'%f');
-b=length(A); clear A
-fid=fopen(FileName,'r');
+b=length(A); clear A;
+fid=fopen(full_file_path,'r');
 
 for i=1:b
     A=fscanf(fid,'%s',1);
@@ -47,11 +48,12 @@ if change
         file1.data(i,:)=sscanf(tline,'%f');
     end
 else
-    file1=importdata(FileName,'\t',3);
+    file1=importdata(full_file_path,'\t',3);
 end
 fclose(fid);
 
-new_handles.filename=FileName;
+[~, name, ext] = fileparts(full_file_path);
+new_handles.filename=[name, ext];
 
 new_handles.sm=0;
 new_handles.triggered=0;

@@ -1,13 +1,14 @@
-function new_handles = load_mat_data(handles, FileName)
+function new_handles = load_mat_data(handles, full_file_path)
 
 new_handles = handles;
 
-data=load(FileName);
+data=load(full_file_path);
 
 dataName=fieldnames(data);
 % if length(dataName); data=getfield(data,dataName{1}); end
 
-new_handles.filename=FileName;
+[~, name, ext] = fileparts(full_file_path);
+new_handles.filename=[name, ext];
 
 new_handles.sm=0;
 new_handles.triggered=0;

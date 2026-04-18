@@ -303,9 +303,9 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                 cfg.mat_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
 
-            cd (PathName)
+            if isequal(FileName, 0) || isequal(PathName, 0), return; end
 
-            handles=load_mat_data(handles,FileName);
+            handles=load_mat_data(handles,fullfile(PathName, FileName));
 
             handles.log = load_log_from_json(fullfile(PathName, FileName));
 
@@ -342,9 +342,9 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [FileName,PathName] = uigetfile('*.*','All Files (*.*)', ...
                 cfg.ascii_data_root_path);
             app.figure1.WindowStyle = 'alwaysontop';
-            cd (PathName)
+            if isequal(FileName,0) || isequal(PathName,0), return; end
 
-            handles = open_ascii_data(handles, FileName);
+            handles = open_ascii_data(handles, fullfile(PathName, FileName));
 
             guidata(hObject, handles);
             plotta_ora(app, handles);
@@ -390,14 +390,14 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [nome,pat]=uiputfile( ...
                 {'*.txt', 'All MATLAB Files (*txt)'; ...
                 '*.*',                   'All Files (*.*)'}, ...
-                'Write as',['~/',handles.filename]);
+                'Write as',fullfile(pwd, handles.filename));
+            if isequal(nome,0) || isequal(pat,0), return; end
             app.figure1.WindowStyle='alwaysontop';
-            cd (pat)
             
-            handles = write_ascii_data(handles,nome, 0, 0, 0);
+            handles = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
-            save_log_to_json(handles, fullfile(pat, nome));
+            save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
         end
 
         % Value changed function: brutalfilt
@@ -1042,16 +1042,16 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [nome,pat]=uiputfile( ...
                 {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
                 '*.*',                   'All Files (*.*)'}, ...
-                'Save as',[pat0 '/' handles.filename]);
+                'Save as',fullfile(pat0, handles.filename));
             app.figure1.WindowStyle='alwaysontop';
-            cd (pat)
+            if isequal(nome,0) || isequal(pat,0), return; end
 
             % Recupera lo stato degli elementi della GUI
             statoF = app.fluid.Value;
             statoGH = app.GH.Value;
             statoCAL = handles.Done;
 
-            [mat_file_path, handles] = save_mat_data(handles,nome, statoF, statoGH, statoCAL);
+            [mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
             save_log_to_json(handles, mat_file_path);
@@ -1073,11 +1073,11 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [nome,pat]=uiputfile( ...
                 {'*.m;*.fig;*.mat;*.mdl', 'All MATLAB Files (*.m, *.fig, *.mat, *.mdl)'; ...
                 '*.*',                   'All Files (*.*)'}, ...
-                'Save as',[pat0 '/' handles.filename]);
+                'Save as',fullfile(pat0, handles.filename));
             app.figure1.WindowStyle='alwaysontop';
             cd (pat)
             
-            [mat_file_path, handles] = save_mat_data(handles,nome, 0, 0, 0);
+            [mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), 0, 0, 0);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
             save_log_to_json(handles, mat_file_path);
@@ -1172,19 +1172,19 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             [nome,pat]=uiputfile( ...
                 {'*.txt', 'All MATLAB Files (*txt)'; ...
                 '*.*',                   'All Files (*.*)'}, ...
-                'Write as',['~/',handles.filename]);
+                'Write as',fullfile(pwd, handles.filename));
             app.figure1.WindowStyle='alwaysontop';
-            cd (pat)
+            if isequal(nome,0) || isequal(pat,0), return; end
             
             % Recupera lo stato degli elementi della GUI
             statoF = app.fluid.Value;
             statoGH = app.GH.Value;
             statoCAL = handles.Done;
 
-            handles = write_ascii_data(handles,nome, statoF, statoGH, statoCAL);
+            handles = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
 
             % Salva il log in formato JSON chiamando la funzione dedicata
-            save_log_to_json(handles, fullfile(pat, nome));
+            save_log_to_json(handles, fullfile(pat, [nome, 'RED.txt']));
         end
 
         % Button pushed function: zoom
