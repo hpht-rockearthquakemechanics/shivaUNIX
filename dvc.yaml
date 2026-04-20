@@ -1,0 +1,20 @@
+# dvc.yaml
+vars:
+  - experiments_dir: '//10.164.3.225/spagnuolo/dvc_tests/shiva'
+  - matlab_scripts: functions
+stages:
+  reproduce_shivaunix_analysis:
+    foreach: ${glob(${experiments_dir}/*)}
+    do:
+      cmd: >
+        matlab -batch 
+        "addpath(genpath('${matlab_scripts}')); 
+        run_pipeline_from_log('${item.replace("\","/")}/${item.name}RED.mat.json')"
+
+      deps:
+        - ${item}/${item.name}RED.mat.json
+        - ${matlab_scripts}/
+
+      outs:
+        - ${item}/${item.name}RED.mat
+        - ${item}/${item.name}RED.mat.json
