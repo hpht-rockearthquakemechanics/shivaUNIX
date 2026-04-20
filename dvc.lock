@@ -1,0 +1,38 @@
+schema: '2.0'
+stages:
+  reproduce_shivaunix_analysis@s2064:
+    cmd: "matlab -batch  \"addpath(genpath('functions'));  run_pipeline_from_log('//10.164.3.225/spagnuolo/Dati/s2064/s2064RED.json')\"\
+      \n"
+    deps:
+    - path: //10.164.3.225/spagnuolo/Dati/s2064/s2064RED.json
+      hash: md5
+      md5: 1cca362714445a1e8285dc1fe1622621
+      size: 2043
+    - path: functions/
+      hash: md5
+      md5: 0d16dd710c2c1482aefd5bdec74786fd.dir
+      size: 103770
+      nfiles: 40
+    outs:
+    - path: //10.164.3.225/spagnuolo/Dati/s2064/s2064RED.mat
+      hash: md5
+      md5: 35d94ad632dcea50ca6176483dbaf6b2
+      size: 18374171
+  reproduce_shivaunix_analysis@s2063:
+    cmd: "matlab -batch  \"addpath(genpath('functions'));  run_pipeline_from_log('//10.164.3.225/spagnuolo/Dati/s2063/s2063RED.json')\"\
+      \n"
+    deps:
+    - path: //10.164.3.225/spagnuolo/Dati/s2063/s2063RED.json
+      hash: md5
+      md5: 426f98ac0f662158605bb849d89e35b9
+      size: 2227
+    - path: functions/
+      hash: md5
+      md5: 0d16dd710c2c1482aefd5bdec74786fd.dir
+      size: 103770
+      nfiles: 40
+    outs:
+    - path: //10.164.3.225/spagnuolo/Dati/s2063/s2063RED.mat
+      hash: md5
+      md5: eea2f4b8f45d346e0cc39488b16e1bbe
+      size: 10933668
