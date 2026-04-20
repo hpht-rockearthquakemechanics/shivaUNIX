@@ -1,0 +1,4 @@
+[core]
+    remote = shivaremote
+['remote "shivaremote"']
+    url = \\10.164.3.225\spagnuolo\dvc_tests\shiva\dvc-storage
