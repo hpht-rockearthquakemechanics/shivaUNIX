@@ -1,7 +1,8 @@
-function new_handles = load_mat_data(handles, full_file_path)
+function new_handles = load_mat_data(handles, params_struct)
 
 new_handles = handles;
 
+full_file_path = params_struct.FileName;
 data=load(full_file_path);
 
 dataName=fieldnames(data);

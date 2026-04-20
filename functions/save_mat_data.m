@@ -1,10 +1,14 @@
-function [final_file_path, handles] = save_mat_data (handles, full_save_path, statoF, statoGH, statoCAL)
+function [final_file_path, handles] = save_mat_data (handles, params_struct)
 
 % Logga il percorso completo che si intende salvare
-params = struct('Name',full_save_path,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
-handles.log = append_action_to_log(handles.log, 'save_mat_data', params);
+handles.log = append_action_to_log(handles.log, 'save_mat_data', params_struct);
 
 file_suffix='.mat';
+
+full_save_path = params_struct.Name;
+statoF = params_struct.statoF;
+statoGH = params_struct.statoGH;
+statoCAL = params_struct.statoCAL;
 
 if statoF==1
     handles.save={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};

@@ -1,13 +1,13 @@
-function new_handles = apply_offset(handles, selected_columns_indices, offset_index)
+function new_handles = apply_offset(handles, params_struct)
 % APPLY_OFFSET - Applica un offset a una o più colonne di dati.
 %
 % SINTASSI:
-%   new_handles = apply_offset(handles, selected_columns_indices, offset_index)
+%   new_handles = apply_offset(handles, params_struct)
 %
 % INPUT:
 %   handles: (struct) La struttura dati principale.
-%   selected_columns_indices: (array) Indici delle colonne a cui applicare l'offset.
-%   offset_index: (int) L'indice del punto da usare come offset (zero).
+%   params_struct: (struct) Struttura con i parametri:
+%           .selected_columns_indices, .offset_index
 %
 % OUTPUT:
 %   new_handles: (struct) La struttura 'handles' aggiornata.
@@ -16,8 +16,11 @@ function new_handles = apply_offset(handles, selected_columns_indices, offset_in
 disp('Applying offset to selected data...');
 new_handles = handles;
 
-params = struct('selected_columns_indices',selected_columns_indices,'offset_index',offset_index);
-new_handles.log = append_action_to_log(new_handles.log, 'apply_offset', params);
+% Estrai i parametri dalla struct
+selected_columns_indices = params_struct.selected_columns_indices;
+offset_index = params_struct.offset_index;
+
+new_handles.log = append_action_to_log(new_handles.log, 'apply_offset', params_struct);
 
 for n = selected_columns_indices
     col_name = new_handles.column{n};

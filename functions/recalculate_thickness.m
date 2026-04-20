@@ -1,13 +1,13 @@
-function new_handles = recalculate_thickness(handles, ztl, zts)
+function new_handles = recalculate_thickness(handles, params_struct)
 % RECALCULATE_THICKNESS - Calcola lo spessore del gouge layer.
 %
 % SINTASSI:
-%   new_handles = calculate_thickness(handles, ztl, zts)
+%   new_handles = recalculate_thickness(handles, params_struct)
 %
 % INPUT:
 %   handles: (struct) La struttura dati principale.
-%   ztl: (double) Valore di zero (in Volt) per il trasduttore LVDT lungo.
-%   zts: (double) Spessore iniziale (in mm) per il calcolo con LVDT corto.
+%   params_struct: (struct) con i campi .ztl (zero in V per LVDT lungo) e
+%           .zts (spessore iniziale in mm per LVDT corto).
 %
 % OUTPUT:
 %   new_handles: (struct) La struttura 'handles' aggiornata con i campi
@@ -17,8 +17,10 @@ function new_handles = recalculate_thickness(handles, ztl, zts)
 
 new_handles = handles;
 
-params = struct('ztl',ztl,'zts',zts);
-new_handles.log = append_action_to_log(new_handles.log, 'recalculate_thickness', params);
+ztl = params_struct.ztl;
+zts = params_struct.zts;
+
+new_handles.log = append_action_to_log(new_handles.log, 'recalculate_thickness', params_struct);
 
 new = struct();
 

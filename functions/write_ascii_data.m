@@ -1,7 +1,11 @@
-function [final_path, handles] = write_ascii_data(handles,full_file_path,statoF,statoGH,statoCAL)
+function [final_path, handles] = write_ascii_data(handles, params_struct)
 
-params = struct('FileName',full_file_path,'statoF',statoF,'statoGH',statoGH,'statoCAL',statoCAL);
-handles.log = append_action_to_log(handles.log, 'write_ascii_data', params);
+handles.log = append_action_to_log(handles.log, 'write_ascii_data', params_struct);
+
+full_file_path = params_struct.FileName;
+statoF = params_struct.statoF;
+statoGH = params_struct.statoGH;
+statoCAL = params_struct.statoCAL;
 
 if statoF==1
     I={'Time' 'shear1' 'EffPressure' 'Mu1' 'Pf' 'LVDT_low' 'LVDT_high' 'vel' 'slip' 'TempE' 'TempM'};

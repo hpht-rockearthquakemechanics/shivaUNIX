@@ -1,14 +1,13 @@
-function new_handles = remove_outliers(handles, column_index, outlier_indices, button_type)
+function new_handles = remove_outliers(handles, params_struct)
 % REMOVE_OUTLIERS - Rimuove i punti anomali da una colonna di dati.
 %
 % SINTASSI:
-%   new_handles = remove_outliers(handles, column_index, outlier_indices, button_type)
+%   new_handles = remove_outliers(handles, params_struct)
 %
 % INPUT:
 %   handles: (struct) La struttura dati principale.
-%   column_index: (int) Indice della colonna da modificare.
-%   outlier_indices: (array) Indici dei punti anomali da rimuovere.
-%   button_type: (int) Tipo di pulsante del mouse premuto (2 per intervallo, 3 per punti singoli).
+%   params_struct: (struct) con i campi .column_index, .outlier_indices,
+%                  .button_type.
 %
 % OUTPUT:
 %   new_handles: (struct) La struttura 'handles' aggiornata.
@@ -17,8 +16,11 @@ function new_handles = remove_outliers(handles, column_index, outlier_indices, b
 disp('Removing outliers...');
 new_handles = handles;
 
-params = struct('column_index',column_index,'outlier_indices',outlier_indices,'button_type',button_type);
-new_handles.log = append_action_to_log(new_handles.log, 'remove_outliers', params);
+column_index = params_struct.column_index;
+outlier_indices = params_struct.outlier_indices;
+button_type = params_struct.button_type;
+
+new_handles.log = append_action_to_log(new_handles.log, 'remove_outliers', params_struct);
 
 col_name = new_handles.column{column_index};
 

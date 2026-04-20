@@ -1,13 +1,12 @@
-function new_handles = filter_velocity(handles, transition_index)
+function new_handles = filter_velocity(handles, params_struct)
 % FILTER_VELOCITY - Filters and combines encoder slip data to calculate velocity.
 %
 % SINTASSI:
-%   new_handles = filter_velocity(handles, transition_index)
+%   new_handles = filter_velocity(handles, params_struct)
 %
 % INPUT:
 %   handles: (struct) The main data structure.
-%   transition_index: (int) The data index at which to transition from
-%                     the first encoder to the second.
+%   params_struct: (struct) with field .transition_index (int).
 %
 % OUTPUT:
 %   new_handles: (struct) The updated 'handles' structure with 'velF' and 'slipF'.
@@ -16,8 +15,8 @@ function new_handles = filter_velocity(handles, transition_index)
 disp('Filtering velocity and slip data...');
 new_handles = handles;
 
-params = struct('transition_index',transition_index);
-new_handles.log = append_action_to_log(new_handles.log, 'filter_velocity', params);
+transition_index = params_struct.transition_index;
+new_handles.log = append_action_to_log(new_handles.log, 'filter_velocity', params_struct);
 
 ya = new_handles.Slip_Enc_1(:,1);
 yb = new_handles.Slip_Enc_2(:,1);

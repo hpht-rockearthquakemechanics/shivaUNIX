@@ -1,16 +1,13 @@
-function new_handles = recalculate_stress(handles, rint, rext, calibration_index, is_GH, pf_index)
+function new_handles = recalculate_stress(handles, params_struct)
 % RECALCULATE_STRESS - Ricalcola stress normale, di taglio e coefficiente di frizione.
 %
 % SINTASSI:
-%   new_handles = recalculate_stress(handles, rint, rext, calibration_index, is_GH, pf_index)
+%   new_handles = recalculate_stress(handles, params_struct)
 % 
 % INPUT:
 %   handles: (struct) La struttura dati principale.
-%   rint: (double) Raggio interno del campione.
-%   rext: (double) Raggio esterno del campione.
-%   calibration_index: (int) Indice della calibrazione selezionata.
-%   is_GH: (logical) Flag che indica se il Gouge Holder è attivo.
-%   pf_index: (int) Indice del menu a tendina per la pressione dei pori (PoreFluid).
+%   params_struct: (struct) con i campi .rint, .rext, .calibration_index,
+%                  .is_GH, .pf_index.
 %
 % OUTPUT:
 %   new_handles: (struct) La struttura 'handles' aggiornata.
@@ -18,8 +15,13 @@ function new_handles = recalculate_stress(handles, rint, rext, calibration_index
 %--------------------------------------------------------------------------
 
 new_handles = handles;
-params = struct('rint', rint, 'rext', rext, 'calibration_index', calibration_index, 'is_GH', is_GH, 'pf_index', pf_index);
-new_handles.log = append_action_to_log(new_handles.log, 'recalculate_stress', params);
+new_handles.log = append_action_to_log(new_handles.log, 'recalculate_stress', params_struct);
+
+rint = params_struct.rint;
+rext = params_struct.rext;
+calibration_index = params_struct.calibration_index;
+is_GH = params_struct.is_GH;
+pf_index = params_struct.pf_index;
 
 new = struct();
 contents = calibration_index;

@@ -1,41 +1,35 @@
-function new_handles = apply_smoothing(handles, column_index, window_size)
-% APPLY_SMOOTHING - Applies a running mean to a data column.
+function new_handles = apply_smoothing(handles, params_struct)
+% APPLY_SMOOTHING - Applica un filtro di media mobile a una colonna di dati.
 %
 % SINTASSI:
-%   new_handles = apply_smoothing(handles, column_index, window_size)
+%   new_handles = apply_smoothing(handles, params_struct)
 %
 % INPUT:
-%   handles: (struct) The main data structure.
-%   column_index: (int) Index of the column to be smoothed.
-%   window_size: (int) The size of the moving average window.
+%   handles: (struct) La struttura dati principale.
+%   params_struct: (struct) con i campi .column_index e .window_size.
 %
 % OUTPUT:
-%   new_handles: (struct) The updated 'handles' structure.
+%   new_handles: (struct) La struttura 'handles' aggiornata con la nuova
+%                colonna smussata e il backup dell'originale.
 %--------------------------------------------------------------------------
 
-disp(['Applying smoothing to column ', num2str(column_index), '...']);
+disp('Applying smoothing...');
 new_handles = handles;
 
-params = struct('column_index',column_index,'window_size',window_size);
-new_handles.log = append_action_to_log(new_handles.log, 'apply_smoothing', params);
+column_index = params_struct.column_index;
+window_size = params_struct.window_size;
+new_handles.log = append_action_to_log(new_handles.log, 'apply_smoothing', params_struct);
 
 col_name = new_handles.column{column_index};
-backup_col_name = [col_name, 'o'];
+new_col_name = [col_name, '_smooth'];
 
-% Backup original data
-new_handles.(backup_col_name) = new_handles.(col_name);
+new_handles.(new_col_name) = smooth(new_handles.(col_name), window_size);
 
-% Apply smoothing using a moving average filter
-if mod(window_size, 2) == 0
-    window_size = window_size + 1; % Ensure window size is odd
-end
-new_handles.(col_name) = smooth(new_handles.(col_name), window_size);
-
-% Add backup column to the list if it's not already there
-if ~any(strcmp(new_handles.column, backup_col_name))
-    new_handles.column{end+1} = backup_col_name;
+% Aggiunge la nuova colonna alla lista se non esiste già
+if ~any(strcmp(new_handles.column, new_col_name))
+    new_handles.column{end+1} = new_col_name;
 end
 
-disp([' -> Smoothing applied. Original data saved in ''', backup_col_name, '''.']);
+disp([' -> Smoothing applied. New column ''', new_col_name, ''' created.']);
 
 end

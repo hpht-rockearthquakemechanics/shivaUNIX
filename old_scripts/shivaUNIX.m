@@ -150,7 +150,8 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
 
-[final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
+params_struct = struct('FileName', fullfile(pat, nome), 'statoF', statoF, 'statoGH', statoGH, 'statoCAL', statoCAL);
+[final_txt_path, handles] = write_ascii_data(handles, params_struct);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, final_txt_path);
@@ -185,7 +186,8 @@ if isequal(FileName,0) || isequal(PathName,0), return; end
 
 % Passa il valore richiesto dalla UI alla funzione
 h_xlab = findobj('Tag', 'XLab');
-handles = open_ascii_data(handles, fullfile(PathName, FileName), get(h_xlab, 'Value'));
+params_struct = struct('FileName', fullfile(PathName, FileName), 'hv', get(h_xlab, 'Value'));
+handles = open_ascii_data(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -476,7 +478,8 @@ disp('Select a point on the plot to use as zero-offset...');
 offset_index = trovaasse(handles.axes1, xi);
 
 % 2. Chiama la funzione esterna
-handles = apply_offset(handles, sel, offset_index);
+params_struct = struct('selected_columns_indices', sel, 'offset_index', offset_index);
+handles = apply_offset(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -516,7 +519,8 @@ end
 
 % 2. Chiama la funzione esterna
 if ~isempty(trigger_index)
-    handles = apply_trigger(handles, trigger_index);
+    params_struct = struct('trigger_index', trigger_index);
+    handles = apply_trigger(handles, params_struct);
     set(findobj('Tag', 'XLab'), 'Value', 2); % Imposta l'asse X su 'Time'
 end
 
@@ -539,7 +543,8 @@ if isempty(Ndec) || Ndec < 1
     disp('Invalid decimation factor.');
     return;
 end
-handles = decimate_data(handles, Ndec);
+params_struct = struct('decimation_factor', Ndec);
+handles = decimate_data(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -581,7 +586,8 @@ if axis_idx > 0
     h_ = findobj('Tag', ['edit' num2str(axis_idx)]);
     col_idx = str2double(get(h_, 'String'));
 
-    handles = apply_smoothing(handles, col_idx, window_size);
+    params_struct = struct('column_index', col_idx, 'window_size', window_size);
+    handles = apply_smoothing(handles, params_struct);
 
     % Update the list boxes
     h_ = findobj('Tag','edit1LB'); set(h_,'String',handles.column);
@@ -627,7 +633,8 @@ if isempty(dt_val)
     return;
 end
 
-handles = cut_data_by_timestep(handles, dt_val);
+params_struct = struct('dt_value', dt_val);
+handles = cut_data_by_timestep(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -653,7 +660,8 @@ range_indices(1) = find(mat(1,:) == min(mat(1,:)), 1);
 range_indices(2) = find(mat(2,:) == min(mat(2,:)), 1);
 
 % 2. Chiama la funzione esterna
-handles = cut_data_range(handles, sort(range_indices));
+params_struct = struct('range_indices', sort(range_indices));
+handles = cut_data_range(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -737,7 +745,8 @@ if get(hObject,'Value') == 1
         end
 
         if ~isempty(gefran_file_path)
-            handles = load_gefran_data(handles, gefran_file_path);
+            params_struct = struct('gefran_file_path', gefran_file_path);
+            handles = load_gefran_data(handles, params_struct);
             % Aggiorna le liste nella UI per mostrare le nuove colonne
             set(findobj('Tag','edit1LB'),'String',handles.column);
             set(findobj('Tag','edit2LB'),'String',handles.column);
@@ -776,7 +785,8 @@ h_ = findobj('Tag', ['edit' num2str(n)]);
 s = str2double(get(h_, 'String'));
 
 % 2. Chiama la funzione esterna
-handles = apply_running_mean(handles, s, range_indices);
+params_struct = struct('column_index', s, 'range_indices', range_indices);
+handles = apply_running_mean(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -836,7 +846,8 @@ for k = 1:length(xi)
 end
 
 % 2. Chiama la funzione esterna
-handles = remove_outliers(handles, s, ll, final_button);
+params_struct = struct('column_index', s, 'outlier_indices', ll, 'button_type', final_button);
+handles = remove_outliers(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -927,7 +938,8 @@ cfg = get_config();
     cfg.mat_data_root_path);
 if isequal(FileName,0) || isequal(PathName,0), return; end
 
-handles=load_mat_data(handles,fullfile(PathName, FileName));
+params_struct = struct('FileName', fullfile(PathName, FileName));
+handles=load_mat_data(handles, params_struct);
 
 % Dopo aver caricato i dati, chiama la funzione dedicata per caricare il log
 handles.log = load_log_from_json(fullfile(PathName, FileName)); % This now correctly finds .mat.json
@@ -948,7 +960,8 @@ function binary_Callback(hObject, eventdata, handles)
     'Write as',fullfile(pwd, handles.filename));
 if isequal(nome,0) || isequal(pat,0), return; end
 
-[final_txt_path, handles] = write_ascii_data(handles, fullfile(pat, nome), 0, 0, 0);
+params_struct = struct('FileName', fullfile(pat, nome), 'statoF', 0, 'statoGH', 0, 'statoCAL', 0);
+[final_txt_path, handles] = write_ascii_data(handles, params_struct);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, final_txt_path);
@@ -978,7 +991,8 @@ h_GH = findobj('Tag', 'GH');
 statoGH = get(h_GH, 'Value');
 statoCAL = handles.Done;
  
-[mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), statoF, statoGH, statoCAL);
+params_struct = struct('Name', fullfile(pat, nome), 'statoF', statoF, 'statoGH', statoGH, 'statoCAL', statoCAL);
+[mat_file_path, handles] = save_mat_data(handles, params_struct);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);
@@ -996,7 +1010,8 @@ pat0=pwd;
     'Save as',fullfile(pat0, handles.filename));
 if isequal(nome,0) || isequal(pat,0), return; end
 
-[mat_file_path, handles] = save_mat_data(handles, fullfile(pat, nome), 0, 0, 0);
+params_struct = struct('Name', fullfile(pat, nome), 'statoF', 0, 'statoGH', 0, 'statoCAL', 0);
+[mat_file_path, handles] = save_mat_data(handles, params_struct);
 
 % Salva il log in formato JSON chiamando la funzione dedicata
 save_log_to_json(handles, mat_file_path);
@@ -1563,7 +1578,8 @@ for L=1:18
 end
 
 % 2. Chiama la funzione esterna
-handles = recalculate_temperature(handles, AIstate);
+params_struct = struct('AI_states', AIstate);
+handles = recalculate_temperature(handles, params_struct);
 
 guidata(hObject, handles);
 plotta_ora(handles);
@@ -1584,7 +1600,8 @@ is_GH = get(findobj('Tag','GH'),'Value');
 pf_index = get(findobj('Tag','popupPF'),'Value');
 
 % 2. Chiama la funzione esterna
-handles = recalculate_stress(handles, rint, rext, calibration_index, is_GH, pf_index);
+params_struct = struct('rint', rint, 'rext', rext, 'calibration_index', calibration_index, 'is_GH', is_GH, 'pf_index', pf_index);
+handles = recalculate_stress(handles, params_struct);
 
 % 3. Aggiorna la UI
 set(findobj('Tag','edit1LB'),'String',handles.column);
@@ -1684,7 +1701,8 @@ if axis_idx > 0
     h_ = findobj('Tag', ['edit' num2str(axis_idx)]);
     col_idx = str2double(get(h_, 'String'));
 
-    handles = apply_brutal_filter(handles, col_idx, filter_param);
+    params_struct = struct('column_index', col_idx, 'filter_param', filter_param);
+    handles = apply_brutal_filter(handles, params_struct);
 
     % Update the list boxes
     h_ = findobj('Tag','edit1LB'); set(h_,'String',handles.column);
@@ -1723,7 +1741,8 @@ if isempty(transition_index)
 end
 
 % 2. Call the external function
-handles = filter_velocity(handles, transition_index);
+params_struct = struct('transition_index', transition_index);
+handles = filter_velocity(handles, params_struct);
 
 % 3. Update UI
 if ~any(strcmp(handles.column, 'velF'))
@@ -1786,7 +1805,8 @@ ztl = str2double(get(findobj('Tag','zero_thickness_long'),'String'));
 zts = str2double(get(findobj('Tag','zero_thickness_short'),'String'));
 
 % 2. Chiama la funzione esterna
-handles = recalculate_thickness(handles, ztl, zts);
+params_struct = struct('ztl', ztl, 'zts', zts);
+handles = recalculate_thickness(handles, params_struct);
 
 % 3. Aggiorna la UI
 set(findobj('Tag','edit1LB'),'String',handles.column);

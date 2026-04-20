@@ -1,9 +1,13 @@
-function new_handles = open_ascii_data(handles, full_file_path, hv)
+function new_handles = open_ascii_data(handles, params_struct)
 
 new_handles = handles;
 
+% Estrai i parametri
+full_file_path = params_struct.FileName;
+hv = params_struct.hv;
+
 % Logga il percorso completo del file
-new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', struct('FileName', full_file_path, 'hv', hv));
+new_handles.log=append_action_to_log(new_handles.log, 'open_ascii_data', params_struct);
 
 %definisce i parametri da matrice
 %new_handles.column=importdata(FileName,'\t',1);
