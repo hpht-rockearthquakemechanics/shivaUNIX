@@ -727,33 +727,16 @@ if get(hObject,'Value') == 1
 
     if strcmp(ButtonName, 'Yes')
         cfg = get_config();
-        % --- Logica di selezione file ---
-        Path2 = cfg.gefran_data_root_path;
-        name = handles.filename(1:4);
-        gefran_file_path = '';
-
-        list = dir([Path2 '/' name '*']);
-        if ~isempty(list)
-            Path2 = [Path2 '/' list(1).name '/'];
-            name2 = dir([Path2 '*.txt']);
-            gefran_file_path = fullfile(Path2, name2(1).name);
-        else
-            [FileGEF, Path] = uigetfile([cfg.gefran_data_root_path '/*.txt'], 'Select the GEFRAN file to load');
-            if ~isequal(FileGEF, 0)
-                gefran_file_path = fullfile(Path, FileGEF);
-            end
-        end
-
+        
+        % Call the dedicated function to find the GEFRAN file path
+        gefran_file_path = find_gefran_file(handles.filename, cfg.gefran_data_root_path);
+        
         if ~isempty(gefran_file_path)
             params_struct = struct('gefran_file_path', gefran_file_path);
             handles = load_gefran_data(handles, params_struct);
-            % Aggiorna le liste nella UI per mostrare le nuove colonne
-            set(findobj('Tag','edit1LB'),'String',handles.column);
-            set(findobj('Tag','edit2LB'),'String',handles.column);
-            set(findobj('Tag','edit3LB'),'String',handles.column);
+            guidata(hObject, handles);
+            plotta_ora(handles);
         end
-
-        guidata(hObject, handles);
     else
         disp('GEFRAN loading cancelled by user.');
         set(hObject, 'Value', 0); % Resetta il checkbox
