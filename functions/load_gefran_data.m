@@ -29,7 +29,7 @@ try
         gefran_handles = load_dynamic_osc(new_handles, gefran_file_path);
     elseif strcmpi(ext, '.txt')
         gefran_handles = load_dynamic_txt(new_handles, gefran_file_path);
-        gefran_handles.timeGEF=gefran_handles.timeGEF/1e7*1e3/handles.tconv;
+        gefran_handles.timeGEF=gefran_handles.timeGEF/1e7*1e3;
     end
 
     % --- 3. Sincronizzazione Temporale ---
