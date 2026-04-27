@@ -15,6 +15,7 @@ default_opts.soglia_R = 0.65;         % Soglia coeff. correlazione
 default_opts.soglia_PR = 1.05;        % Soglia Peak Ratio
 default_opts.soglia_Z = 3.0;          % Soglia Z-Score
 default_opts.min_peak_dist = 100;     % Distanza minima tra picchi (campioni)
+default_opts.rescale = [-1, 1];
 
 % Unisci i default con le opzioni fornite dall'utente
 opts = merge_structs(default_opts, options);
@@ -32,8 +33,8 @@ end
 
 % misura2 = misura2/max(abs(misura2));
 % misura1 = misura1/max(abs(misura1));
-misura2 = rescale(misura2, -1, 1);
-misura1 = rescale(misura1, -1, 1);
+misura2 = rescale(misura2, opts.rescale(1), opts.rescale(2));
+misura1 = rescale(misura1, opts.rescale(1), opts.rescale(2));
 
 % pulire timestep duplicati
 % =========================================================================
@@ -58,8 +59,11 @@ min_dt2 = min(diff_t2(diff_t2 > 0));
 % siccome se prendo il minimo, sovracampiono per niente l'altro segnale,
 % qui sotto decido di prender il massimo tra i due timestep minimi
 dt = max([min_dt1, min_dt2]);
+
+% if timestep is larger than a millisecond
 if dt>1
-    dt=min([min_dt1, min_dt2]);
+    % dt=min([min_dt1, min_dt2]);
+    dt=1;
 end
 
 disp(['Il dt minimo calcolato per la cross-correlazione è: ', num2str(dt)]);
@@ -87,11 +91,32 @@ m2_clean = m2_unif - mean(m2_unif);
 offset1 = lags1(idx1) * dt;
 
 %% CROSS CORRELAZIONE LOCALE
-r_norm2 = normxcorr2(m2_clean, m1_clean);
-% Calcolo offset specifico per normxcorr2
-[~, idx2] = max(r_norm2);
-ritardo_campioni2 = idx2 - length(m2_clean);
-offset2 = ritardo_campioni2 * dt;
+if size(m2_clean,1)<size(m1_clean,1)
+    disp('m2 is shorter')
+    r_norm2 = normxcorr2(m2_clean, m1_clean);
+    % Calcolo offset specifico per normxcorr2
+    [~, idx2] = max(r_norm2);
+    ritardo_campioni2 = idx2 - length(m2_clean);
+    offset2 = ritardo_campioni2 * dt;
+
+else
+    disp('m1 is shorter')
+    r_norm2 = normxcorr2(m1_clean, m2_clean);
+    % Calcolo offset specifico per normxcorr2
+    [~, idx2] = max(r_norm2);
+    ritardo_campioni2 = idx2 - length(m1_clean);
+    offset2 = ritardo_campioni2 * dt * -1;
+
+end
+
+if 0
+    figure(9999)
+    subplot(1,2,1)
+    plot(r_norm1)
+
+    subplot(1,2,2)
+    plot(r_norm2)
+end
 
 %% VALUTAZIONE QUALITY
 % Ora valuta_allineamento riceve l'offset già calcolato e funge solo da quality gate
@@ -132,7 +157,7 @@ else
 end
 if ~isnan(offset_finale)
     % 4. Applichi l'offset finale scelto
-    % La correzione corretta è semplicemente sommare l'offset calcolato.
+    % Per allineare tempo2 a tempo1, sottraiamo l'offset calcolato.
     tempo2_corretto = tempo2 + (min(tempo1) + offset_finale - min(tempo2));
 else
     tempo2_corretto = [];
@@ -140,17 +165,29 @@ end
 
 %% 5. VISUALIZZAZIONE
 if 0
+
     figure(999)
     yyaxis left;
-    plot(tempo1, misura1, '-k');
-    ylabel('TorqueLG');
+    plot(tempo1, misura1, '-k', 'DisplayName', 'misura 1');
+    ylabel('m1');
     
-    if ~isempty(tempo2_corretto)
+    if ~isempty(offset1)
+        t2a = tempo2 + (min(tempo1) + offset1 - min(tempo2));
+
         yyaxis right;
         hold on;
-        plot(tempo2_corretto, misura2, '-r');
-        ylabel('TorqueGEF (Inverted)');
+        plot(t2a, misura2, '-r', 'DisplayName','first method');
+        ylabel('m2');
     end
+    if ~isempty(offset2)
+        t2b = tempo2 + (min(tempo1) + offset2 - min(tempo2));
+
+        yyaxis right;
+        hold on;
+        plot(t2b, misura2, '-g', 'DisplayName','second method');
+        ylabel('m2');
+    end
+
 end
 end
 
