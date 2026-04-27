@@ -737,6 +737,16 @@ if get(hObject,'Value') == 1
             guidata(hObject, handles);
             plotta_ora(handles);
         end
+
+        isco_file_paths = find_isco_file(handles.filename, cfg.isco_data_root_path);
+
+        if ~isempty(isco_file_paths)
+            params_struct = struct();
+            params_struct.isco_file_paths = isco_file_paths;
+            handles = load_isco_data(handles, params_struct);
+            guidata(hObject, handles);
+            plotta_ora(handles);
+        end
     else
         disp('GEFRAN loading cancelled by user.');
         set(hObject, 'Value', 0); % Resetta il checkbox

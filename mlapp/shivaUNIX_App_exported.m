@@ -70,12 +70,12 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
         zoom                         matlab.ui.control.Button
         edit1                        matlab.ui.control.EditField
         text13                       matlab.ui.control.Label
-        axes6                        matlab.ui.control.UIAxes
-        axes5                        matlab.ui.control.UIAxes
-        axes4                        matlab.ui.control.UIAxes
-        axes3                        matlab.ui.control.UIAxes
-        axes2                        matlab.ui.control.UIAxes
         axes1                        matlab.ui.control.UIAxes
+        axes2                        matlab.ui.control.UIAxes
+        axes3                        matlab.ui.control.UIAxes
+        axes4                        matlab.ui.control.UIAxes
+        axes5                        matlab.ui.control.UIAxes
+        axes6                        matlab.ui.control.UIAxes
     end
 
 
@@ -252,6 +252,16 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
                     if ~isempty(gefran_file_path)
                         params_struct = struct('gefran_file_path', gefran_file_path);
                         handles = load_gefran_data(handles, params_struct);
+                        guidata(hObject, handles);
+                        plotta_ora(app,handles);
+                    end
+
+                    isco_file_paths = find_isco_file(handles.filename, cfg.isco_data_root_path);
+
+                    if ~isempty(isco_file_paths)
+                        params_struct = struct();
+                        params_struct.isco_file_paths = isco_file_paths;
+                        handles = load_isco_data(handles, params_struct);
                         guidata(hObject, handles);
                         plotta_ora(app,handles);
                     end
@@ -1287,57 +1297,29 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.GridLayout.RowSpacing = 1;
             app.GridLayout.Padding = [5 1 5 1];
 
-            % Create axes1
-            app.axes1 = uiaxes(app.GridLayout);
-            app.axes1.CameraPosition = [0.5 0.5 9.16025403784439];
-            app.axes1.CameraTarget = [0.5 0.5 0.5];
-            app.axes1.CameraUpVector = [0 1 0];
-            app.axes1.CameraViewAngle = 6.60861036031192;
-            app.axes1.DataAspectRatio = [1 1 1];
-            app.axes1.PlotBoxAspectRatio = [1 1 1];
-            app.axes1.XLim = [0 1];
-            app.axes1.YLim = [0 1];
-            app.axes1.ZLim = [0 1];
-            app.axes1.CLim = [0 1];
-            app.axes1.ALim = [0 1];
-            app.axes1.XTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes1.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes1.YTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes1.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes1.ZTick = [0 0.5 1];
-            app.axes1.ZTickLabel = '';
-            app.axes1.TickDir = 'in';
-            app.axes1.FontSize = 12;
-            app.axes1.NextPlot = 'replace';
-            app.axes1.Layout.Row = [2 9];
-            app.axes1.Layout.Column = [1 4];
-            app.axes1.Tag = 'axes1';
+            % Create axes6
+            app.axes6 = uiaxes(app.GridLayout);
+            app.axes6.FontSize = 1;
+            app.axes6.NextPlot = 'replace';
+            app.axes6.Layout.Row = [2 4];
+            app.axes6.Layout.Column = 11;
+            app.axes6.Tag = 'axes6';
 
-            % Create axes2
-            app.axes2 = uiaxes(app.GridLayout);
-            app.axes2.CameraPosition = [0.5 0.5 9.16025403784439];
-            app.axes2.CameraTarget = [0.5 0.5 0.5];
-            app.axes2.CameraUpVector = [0 1 0];
-            app.axes2.CameraViewAngle = 6.60861036031192;
-            app.axes2.DataAspectRatio = [1 1 1];
-            app.axes2.PlotBoxAspectRatio = [1 1 1];
-            app.axes2.XLim = [0 1];
-            app.axes2.YLim = [0 1];
-            app.axes2.ZLim = [0 1];
-            app.axes2.CLim = [0 1];
-            app.axes2.ALim = [0 1];
-            app.axes2.XTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes2.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes2.YTick = [0 0.2 0.4 0.6 0.8 1];
-            app.axes2.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
-            app.axes2.ZTick = [0 0.5 1];
-            app.axes2.ZTickLabel = '';
-            app.axes2.TickDir = 'in';
-            app.axes2.FontSize = 12;
-            app.axes2.NextPlot = 'replace';
-            app.axes2.Layout.Row = [12 19];
-            app.axes2.Layout.Column = [1 4];
-            app.axes2.Tag = 'axes2';
+            % Create axes5
+            app.axes5 = uiaxes(app.GridLayout);
+            app.axes5.FontSize = 12;
+            app.axes5.NextPlot = 'replace';
+            app.axes5.Layout.Row = [24 28];
+            app.axes5.Layout.Column = [6 11];
+            app.axes5.Tag = 'axes5';
+
+            % Create axes4
+            app.axes4 = uiaxes(app.GridLayout);
+            app.axes4.FontSize = 12;
+            app.axes4.NextPlot = 'replace';
+            app.axes4.Layout.Row = [18 22];
+            app.axes4.Layout.Column = [6 11];
+            app.axes4.Tag = 'axes4';
 
             % Create axes3
             app.axes3 = uiaxes(app.GridLayout);
@@ -1365,29 +1347,57 @@ classdef shivaUNIX_App_exported < matlab.apps.AppBase
             app.axes3.Layout.Column = [1 4];
             app.axes3.Tag = 'axes3';
 
-            % Create axes4
-            app.axes4 = uiaxes(app.GridLayout);
-            app.axes4.FontSize = 12;
-            app.axes4.NextPlot = 'replace';
-            app.axes4.Layout.Row = [18 22];
-            app.axes4.Layout.Column = [6 11];
-            app.axes4.Tag = 'axes4';
+            % Create axes2
+            app.axes2 = uiaxes(app.GridLayout);
+            app.axes2.CameraPosition = [0.5 0.5 9.16025403784439];
+            app.axes2.CameraTarget = [0.5 0.5 0.5];
+            app.axes2.CameraUpVector = [0 1 0];
+            app.axes2.CameraViewAngle = 6.60861036031192;
+            app.axes2.DataAspectRatio = [1 1 1];
+            app.axes2.PlotBoxAspectRatio = [1 1 1];
+            app.axes2.XLim = [0 1];
+            app.axes2.YLim = [0 1];
+            app.axes2.ZLim = [0 1];
+            app.axes2.CLim = [0 1];
+            app.axes2.ALim = [0 1];
+            app.axes2.XTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes2.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes2.YTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes2.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes2.ZTick = [0 0.5 1];
+            app.axes2.ZTickLabel = '';
+            app.axes2.TickDir = 'in';
+            app.axes2.FontSize = 12;
+            app.axes2.NextPlot = 'replace';
+            app.axes2.Layout.Row = [12 19];
+            app.axes2.Layout.Column = [1 4];
+            app.axes2.Tag = 'axes2';
 
-            % Create axes5
-            app.axes5 = uiaxes(app.GridLayout);
-            app.axes5.FontSize = 12;
-            app.axes5.NextPlot = 'replace';
-            app.axes5.Layout.Row = [24 28];
-            app.axes5.Layout.Column = [6 11];
-            app.axes5.Tag = 'axes5';
-
-            % Create axes6
-            app.axes6 = uiaxes(app.GridLayout);
-            app.axes6.FontSize = 1;
-            app.axes6.NextPlot = 'replace';
-            app.axes6.Layout.Row = [2 4];
-            app.axes6.Layout.Column = 11;
-            app.axes6.Tag = 'axes6';
+            % Create axes1
+            app.axes1 = uiaxes(app.GridLayout);
+            app.axes1.CameraPosition = [0.5 0.5 9.16025403784439];
+            app.axes1.CameraTarget = [0.5 0.5 0.5];
+            app.axes1.CameraUpVector = [0 1 0];
+            app.axes1.CameraViewAngle = 6.60861036031192;
+            app.axes1.DataAspectRatio = [1 1 1];
+            app.axes1.PlotBoxAspectRatio = [1 1 1];
+            app.axes1.XLim = [0 1];
+            app.axes1.YLim = [0 1];
+            app.axes1.ZLim = [0 1];
+            app.axes1.CLim = [0 1];
+            app.axes1.ALim = [0 1];
+            app.axes1.XTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes1.XTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes1.YTick = [0 0.2 0.4 0.6 0.8 1];
+            app.axes1.YTickLabel = {'0  '; '0.2'; '0.4'; '0.6'; '0.8'; '1  '};
+            app.axes1.ZTick = [0 0.5 1];
+            app.axes1.ZTickLabel = '';
+            app.axes1.TickDir = 'in';
+            app.axes1.FontSize = 12;
+            app.axes1.NextPlot = 'replace';
+            app.axes1.Layout.Row = [2 9];
+            app.axes1.Layout.Column = [1 4];
+            app.axes1.Tag = 'axes1';
 
             % Create text13
             app.text13 = uilabel(app.GridLayout);

@@ -25,4 +25,7 @@ config.gefran_data_root_path = config.ascii_data_root_path;
 % Percorso del file delle proprietà termiche (assunto essere nella cartella functions o nel path)
 config.thermal_properties_file = 'thermal.txt';
 
+% Directory radice per i file di dati ISCO
+config.isco_data_root_path = config.ascii_data_root_path;
+
 end
