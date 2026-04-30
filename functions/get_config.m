@@ -28,4 +28,7 @@ config.thermal_properties_file = 'thermal.txt';
 % Directory radice per i file di dati ISCO
 config.isco_data_root_path = config.ascii_data_root_path;
 
+% Directory radice per i file di dati SPECTROMETER
+config.spectrometer_data_root_path = '\\10.164.3.225\spagnuolo\Quadstar';
+
 end

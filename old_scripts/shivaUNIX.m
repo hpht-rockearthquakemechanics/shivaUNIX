@@ -747,6 +747,16 @@ if get(hObject,'Value') == 1
             guidata(hObject, handles);
             plotta_ora(handles);
         end
+
+        spectrometer_file_path = find_spectrometer_file(handles.filename, cfg.spectrometer_data_root_path);
+
+        if ~isempty(spectrometer_file_path)
+            params_struct = struct();
+            params_struct.spectrometer_file_path = spectrometer_file_path;
+            handles = load_spectrometer_data(handles, params_struct);
+            guidata(hObject, handles);
+            plotta_ora(handles);
+        end
     else
         disp('GEFRAN loading cancelled by user.');
         set(hObject, 'Value', 0); % Resetta il checkbox

@@ -58,6 +58,7 @@ fclose(fid);
 
 [~, name, ext] = fileparts(full_file_path);
 new_handles.filename=[name, ext];
+new_handles.ascii_lastwrite_datetime=get_file_property_datetime(full_file_path,'LastWriteTimeUtc');
 
 new_handles.sm=0;
 new_handles.triggered=0;
